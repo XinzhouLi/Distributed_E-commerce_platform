@@ -1,0 +1,19 @@
+<changelist name="Uncommitted_changes_before_rebase_[Changes]2" date="1677455453101" recycled="false" toDelete="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Changes]2/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before rebase [Changes]" />
+  <binary>
+    <option name="BEFORE_PATH" value="FrontEnd/node_modules/.cache/default-development/0.pack" />
+    <option name="AFTER_PATH" value="FrontEnd/node_modules/.cache/default-development/0.pack" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Changes]2/0.pack" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="FrontEnd/node_modules/.cache/default-development/index.pack.old" />
+    <option name="AFTER_PATH" value="FrontEnd/node_modules/.cache/default-development/index.pack.old" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Changes]2/index.pack.old" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="FrontEnd/node_modules/.cache/default-development/index.pack" />
+    <option name="AFTER_PATH" value="FrontEnd/node_modules/.cache/default-development/index.pack" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_rebase_[Changes]2/index.pack" />
+  </binary>
+</changelist>
