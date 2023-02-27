@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="82bbfe72-c3a7-4f68-b8f3-1c62951a9fcd" name="Changes" comment="" />
+    <list default="true" id="82bbfe72-c3a7-4f68-b8f3-1c62951a9fcd" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/FrontEnd/node_modules/.cache/default-development/0.pack" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/node_modules/.cache/default-development/0.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/node_modules/.cache/default-development/index.pack" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/node_modules/.cache/default-development/index.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FrontEnd/node_modules/.cache/default-development/index.pack.old" beforeDir="false" afterPath="$PROJECT_DIR$/FrontEnd/node_modules/.cache/default-development/index.pack.old" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -11,6 +15,9 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="2MI9xTtQAM4gSGB6FEXlrt8tWrL" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -29,10 +36,10 @@
   }
 }</component>
   <component name="RunManager" selected="Node.js.www">
-    <configuration name="app.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/back-end/app.js" working-dir="$PROJECT_DIR$/back-end">
+    <configuration name="app.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/BackEnd/app.js" working-dir="$PROJECT_DIR$/BackEnd">
       <method v="2" />
     </configuration>
-    <configuration name="www" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/back-end/bin/www" working-dir="$PROJECT_DIR$/back-end/bin">
+    <configuration name="www" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/BackEnd/bin/www" working-dir="$PROJECT_DIR$/BackEnd/bin">
       <method v="2" />
     </configuration>
     <recent_temporary>
@@ -56,5 +63,16 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
