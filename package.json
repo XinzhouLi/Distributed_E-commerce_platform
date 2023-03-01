@@ -1,0 +1,24 @@
+{
+  "name": "distributed_e-commerce_platform",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/XinzhouLi/Distributed_E-commerce_platform.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/XinzhouLi/Distributed_E-commerce_platform/issues"
+  },
+  "homepage": "https://github.com/XinzhouLi/Distributed_E-commerce_platform#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.4"
+  }
+}
