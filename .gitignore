@@ -1,0 +1,7 @@
+.git
+.DS_Store
+*/.DS_Store
+*/.idea
+.idea
+BackEnd/node_modules
+FrontEnd/node_modules
