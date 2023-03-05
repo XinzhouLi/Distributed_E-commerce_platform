@@ -45,7 +45,7 @@ function MainPage() {
         <Row>
         <Col>
         <Card style={{color : 'black' }}>
-          <Card.Img src = "https://picsum.photos/200/100" />
+          <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
           <Card.Body>
             <Card.Title>
               Card Example
@@ -60,7 +60,7 @@ function MainPage() {
         
         <Col>
         <Card style={{color : 'black'}}>
-          <Card.Img src = "https://picsum.photos/200/100" />
+          <Card.Img src = "https://source.unsplash.com/random/50×50/?table" />
           <Card.Body>
             <Card.Title>
               Card Example
@@ -72,28 +72,13 @@ function MainPage() {
           </Card.Body>
         </Card>
         </Col>
-
-        <Col>
-        <Card style={{color : 'black'}}>
-          <Card.Img src = "https://picsum.photos/200/100" />
-          <Card.Body>
-            <Card.Title>
-              Card Example
-            </Card.Title>
-            <Card.Text>
-              Something
-            </Card.Text>
-            <Button variant='primary'> Sofa </Button>
-          </Card.Body>
-        </Card>
-        </Col>
         </Row>
 
 
         <Row>
         <Col>
         <Card style={{color : 'black' }}>
-          <Card.Img src = "https://picsum.photos/200/100" />
+          <Card.Img src = "https://source.unsplash.com/random/50×50/?bed" />
           <Card.Body>
             <Card.Title>
               Card Example
@@ -108,22 +93,7 @@ function MainPage() {
         
         <Col>
         <Card style={{color : 'black'}}>
-          <Card.Img src = "https://picsum.photos/200/100" />
-          <Card.Body>
-            <Card.Title>
-              Card Example
-            </Card.Title>
-            <Card.Text>
-              Something
-            </Card.Text>
-            <Button variant='primary'> More </Button>
-          </Card.Body>
-        </Card>
-        </Col>
-
-        <Col>
-        <Card style={{color : 'black'}}>
-          <Card.Img src = "https://picsum.photos/200/100" />
+          <Card.Img src = "https://source.unsplash.com/random/50×50/?sofa" />
           <Card.Body>
             <Card.Title>
               Card Example

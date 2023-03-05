@@ -2,7 +2,7 @@ import React from 'react';
 import {Container, Row, Col, Button, Alert, Breadcrumb, Card, Form } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-function generateMainPage() {
+function generateItemPage() {
   return (
     <div className="App">
       <header className="App-header">
@@ -35,4 +35,4 @@ function generateMainPage() {
   );
 }
 
-export default generateMainPage;
+export default generateItemPage;
