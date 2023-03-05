@@ -13,7 +13,7 @@ app.get("/create_chairTable",(req,res)=>{
           db.run('CREATE TABLE IF NOT EXISTS chair(id  integer primary key autoincrement,chairId text,chairName text, quantity integer, description text, image text)',(err)=>{
               if(!err){
                       console.log('table is created sucessfully!')
-                      db.run('INSERT INTO chair(chairId,chairName ,quantity, description, image) values("c01","chair1","99","This is a pretty chair","90sd90asda90sf8a0gas")',(err)=>{
+                      db.run('INSERT INTO chair(chairId,chairName ,quantity, description, image) values("c01","chair5","99","This is a pretty chair","90sd90asda90sf8a0gas")',(err)=>{
                         if(!err){
                             ans['stat']=1;
                             ans['content']='Data add successfully!';
@@ -34,6 +34,55 @@ app.get("/create_chairTable",(req,res)=>{
       }
   })
 })
+
+// search all chair table
+app.get("/search_all_chair",(req,res)=>{
+    var db = new sqlite3.Database('./db/master.db',(err,data)=>{
+      let ans={stat:"",content:""}
+        if(!err){
+            db.all('SELECT * FROM chair',(err, data)=>{
+                if(!err){
+                    console.log(typeof data)
+                    console.log(data)
+                      ans['stat']=1;
+                      ans['content']=data;
+                      return res.send(JSON.stringify(ans))
+                }
+                else{
+                    ans['stat']=0;
+                      ans['content']="sorry did not find chair info";
+                    console.log(err.message)
+                }
+            })
+        }
+    })
+  })
+
+  // search chair table by id
+app.get("/search_chair_byId",(req,res)=>{
+    var chairId = req.body.chairId
+    var db = new sqlite3.Database('./db/master.db',(err,data)=>{
+      let ans={stat:"",content:""}
+        if(!err){
+            db.all('SELECT * FROM chair where chairId="' + chairId + '"',(err, data)=>{
+                if(!err){
+                    console.log(typeof data)
+                    console.log(data)
+                      ans['stat']=1;
+                      ans['content']=data;
+                      return res.send(JSON.stringify(ans))
+                }
+                else{
+                    ans['stat']=0;
+                      ans['content']="sorry did not find chair info by chairId";
+                    console.log(err.message)
+                }
+            })
+        }
+    })
+  })
+
+
 
 
 // edit chair quantity
@@ -87,6 +136,13 @@ app.post("/change_chair_quantity", (req, res) => {
 
 
 
+
+
+
+
+
+
+
 // create table table
 app.get("/create_tableTable",(req,res)=>{
   var db = new sqlite3.Database('./db/master.db',(err,data)=>{
@@ -95,7 +151,7 @@ app.get("/create_tableTable",(req,res)=>{
           db.run('CREATE TABLE IF NOT EXISTS tables(id  integer primary key autoincrement,tableId text,tableName text, quantity integer, description text, image text)',(err)=>{
               if(!err){
                       console.log('table is created sucessfully!')
-                      db.run('INSERT INTO tables(tableId,tableName ,quantity, description, image) values("t01","table1","99","This is a pretty table","90sd90asda90sf8a0gas")',(err)=>{
+                      db.run('INSERT INTO tables(tableId,tableName ,quantity, description, image) values("t02","table2","99","This is a pretty table","90sd90asda90sf8a0gas")',(err)=>{
                         if(!err){
                             ans['stat']=1;
                             ans['content']='Data add successfully!';
@@ -116,6 +172,54 @@ app.get("/create_tableTable",(req,res)=>{
       }
   })
 })
+
+
+// search all table table
+app.get("/search_all_table",(req,res)=>{
+    var db = new sqlite3.Database('./db/master.db',(err,data)=>{
+      let ans={stat:"",content:""}
+        if(!err){
+            db.all('SELECT * FROM tables',(err, data)=>{
+                if(!err){
+                    console.log(typeof data)
+                    console.log(data)
+                      ans['stat']=1;
+                      ans['content']=data;
+                      return res.send(JSON.stringify(ans))
+                }
+                else{
+                    ans['stat']=0;
+                      ans['content']="sorry did not find table info";
+                    console.log(err.message)
+                }
+            })
+        }
+    })
+  })
+
+  // search table table by id
+app.get("/search_table_byId",(req,res)=>{
+    var tableId = req.body.tableId
+    var db = new sqlite3.Database('./db/master.db',(err,data)=>{
+      let ans={stat:"",content:""}
+        if(!err){
+            db.all('SELECT * FROM tables where tableId="' + tableId + '"',(err, data)=>{
+                if(!err){
+                    console.log(typeof data)
+                    console.log(data)
+                      ans['stat']=1;
+                      ans['content']=data;
+                      return res.send(JSON.stringify(ans))
+                }
+                else{
+                    ans['stat']=0;
+                      ans['content']="sorry did not find table info by tableId";
+                    console.log(err.message)
+                }
+            })
+        }
+    })
+  })
 
 
 //edit table quantity
@@ -178,7 +282,7 @@ app.get("/create_sofaTable",(req,res)=>{
           db.run('CREATE TABLE IF NOT EXISTS sofa(id  integer primary key autoincrement,sofaId text,sofaName text, quantity integer, description text, image text)',(err)=>{
               if(!err){
                       console.log('sofa is created sucessfully!')
-                      db.run('INSERT INTO sofa(sofaId,sofaName ,quantity, description, image) values("s01","sofa1","99","This is a pretty sofa","90sd90asda90sf8a0gas")',(err)=>{
+                      db.run('INSERT INTO sofa(sofaId,sofaName ,quantity, description, image) values("s02","sofa2","99","This is a pretty sofa","90sd90asda90sf8a0gas")',(err)=>{
                         if(!err){
                             ans['stat']=1;
                             ans['content']='Data add successfully!';
@@ -199,6 +303,55 @@ app.get("/create_sofaTable",(req,res)=>{
       }
   })
 })
+
+
+// search all sofa table
+app.get("/search_all_sofa",(req,res)=>{
+    var db = new sqlite3.Database('./db/master.db',(err,data)=>{
+      let ans={stat:"",content:""}
+        if(!err){
+            db.all('SELECT * FROM sofa',(err, data)=>{
+                if(!err){
+                    console.log(typeof data)
+                    console.log(data)
+                      ans['stat']=1;
+                      ans['content']=data;
+                      return res.send(JSON.stringify(ans))
+                }
+                else{
+                    ans['stat']=0;
+                      ans['content']="sorry did not find sofa info";
+                    console.log(err.message)
+                }
+            })
+        }
+    })
+  })
+
+  // search sofa table by id
+app.get("/search_sofa_byId",(req,res)=>{
+    var sofaId = req.body.sofaId
+    var db = new sqlite3.Database('./db/master.db',(err,data)=>{
+      let ans={stat:"",content:""}
+        if(!err){
+            db.all('SELECT * FROM sofa where sofaId="' + sofaId + '"',(err, data)=>{
+                if(!err){
+                    console.log(typeof data)
+                    console.log(data)
+                      ans['stat']=1;
+                      ans['content']=data;
+                      return res.send(JSON.stringify(ans))
+                }
+                else{
+                    ans['stat']=0;
+                      ans['content']="sorry did not find sofa info by sofaId";
+                    console.log(err.message)
+                }
+            })
+        }
+    })
+  })
+
 
 
 // edit sofa quantity
@@ -261,7 +414,7 @@ app.get("/create_bedTable",(req,res)=>{
           db.run('CREATE TABLE IF NOT EXISTS bed(id  integer primary key autoincrement,bedId text,bedName text, quantity integer, description text, image text)',(err)=>{
               if(!err){
                       console.log('bed is created sucessfully!')
-                      db.run('INSERT INTO bed(bedId,bedName ,quantity, description, image) values("b01","bed1","99","This is a pretty bed","90sd90asda90sf8a0gas")',(err)=>{
+                      db.run('INSERT INTO bed(bedId,bedName ,quantity, description, image) values("b02","bed2","99","This is a pretty bed","90sd90asda90sf8a0gas")',(err)=>{
                         if(!err){
                             ans['stat']=1;
                             ans['content']='Data add successfully!';
@@ -282,6 +435,54 @@ app.get("/create_bedTable",(req,res)=>{
       }
   })
 })
+
+// search all bed table
+app.get("/search_all_bed",(req,res)=>{
+    var db = new sqlite3.Database('./db/master.db',(err,data)=>{
+      let ans={stat:"",content:""}
+        if(!err){
+            db.all('SELECT * FROM bed',(err, data)=>{
+                if(!err){
+                    console.log(typeof data)
+                    console.log(data)
+                      ans['stat']=1;
+                      ans['content']=data;
+                      return res.send(JSON.stringify(ans))
+                }
+                else{
+                    ans['stat']=0;
+                      ans['content']="sorry did not find bed info";
+                    console.log(err.message)
+                }
+            })
+        }
+    })
+  })
+
+  // search bed table by id
+app.get("/search_bed_byId",(req,res)=>{
+    var bedId = req.body.bedId
+    var db = new sqlite3.Database('./db/master.db',(err,data)=>{
+      let ans={stat:"",content:""}
+        if(!err){
+            db.all('SELECT * FROM bed where bedId="' + bedId + '"',(err, data)=>{
+                if(!err){
+                    console.log(typeof data)
+                    console.log(data)
+                      ans['stat']=1;
+                      ans['content']=data;
+                      return res.send(JSON.stringify(ans))
+                }
+                else{
+                    ans['stat']=0;
+                      ans['content']="sorry did not find bed info by bedId";
+                    console.log(err.message)
+                }
+            })
+        }
+    })
+  })
+
 
 
 // edit bed quantity
@@ -370,6 +571,32 @@ app.get("/create_orderTable",(req,res)=>{
       }
   })
 })
+
+
+
+  // search orderInfo table by id
+  app.get("/search_order_byId",(req,res)=>{
+    var orderId = req.body.orderId
+    var db = new sqlite3.Database('./db/master.db',(err,data)=>{
+      let ans={stat:"",content:""}
+        if(!err){
+            db.all('SELECT * FROM orderInfo where orderId="' + orderId + '"',(err, data)=>{
+                if(!err){
+                    console.log(typeof data)
+                    console.log(data)
+                      ans['stat']=1;
+                      ans['content']=data;
+                      return res.send(JSON.stringify(ans))
+                }
+                else{
+                    ans['stat']=0;
+                      ans['content']="sorry did not find bed info by orderId";
+                    console.log(err.message)
+                }
+            })
+        }
+    })
+  })
 
 
 
