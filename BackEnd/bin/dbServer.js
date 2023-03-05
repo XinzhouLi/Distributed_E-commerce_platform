@@ -6,6 +6,7 @@ app.use(express.json());
 var dbPath = '../db/master.db'
 
 // search all table
+// tableName example: chair 
 function getAllInfo(tableName){
     var db = new sqlite3.Database(dbPath,(err,data)=>{
       let ans={stat:"",content:""}
@@ -31,6 +32,9 @@ function getAllInfo(tableName){
 
 
   // search item by id
+  //tableName example: bed
+  //IdName example: bedId
+  //Id example: b03
 function getInfoByID(tableName,IdName,Id){
     var db = new sqlite3.Database(dbPath,(err,data)=>{
       let ans={stat:"",content:""}
@@ -55,11 +59,12 @@ function getInfoByID(tableName,IdName,Id){
   }
 
 
-
-
-// edit item quantity
+  // edit item quantity
+  //tableName example: bed
+  //IdName example: bedId
+  //Id example: b03
+  //changeNum: 1
 function editItemQuantity(tableName,IdName,Id,changeNum){
-//   console.log("chairId: "+chairId+"    changeNumber: "+changeNum)
   let ans = { stat: "", content: "" }
   //print bubby
   console.log("decrease the number of "+Id+" by "+changeNum)
@@ -67,7 +72,6 @@ function editItemQuantity(tableName,IdName,Id,changeNum){
       if (!err) {
           // check if the username and password is correct
           db.all('SELECT quantity FROM "'+tableName+'" where "'+IdName+'"="' + Id + '"', (err, data) => {
-            
                console.log(data)
               if (data.length == 1) {
                   console.log(data[0]['quantity'])
@@ -75,7 +79,6 @@ function editItemQuantity(tableName,IdName,Id,changeNum){
                   let sql;
                   sql = 'UPDATE "'+tableName+'" SET quantity = ? WHERE "'+IdName+'" = ?';
                   newQuantity=quantity-changeNum
-                  // newQuantity=98
                   db.run(sql, [newQuantity, Id], (err) => {
                       console.log("Reset quantity sucessfully")
                       if (!err) {
@@ -100,19 +103,16 @@ function editItemQuantity(tableName,IdName,Id,changeNum){
 }
 
 
-
-
 // create order table
+// insertOrderData form: orderId, customerName,customerAddress, cardNumber, exp_date, secu_code, itemName
+// insertOrderData example: '"ABDC","chao","188 harvest rose","4563888855742057","05/16","826","Table88"'
 function insertOrder(insertOrderData){
   var db = new sqlite3.Database(dbPath,(err,data)=>{
     let ans={stat:"",content:""}
       if(!err){
-        console.log("1111")
         db.run('CREATE TABLE IF NOT EXISTS orderInfo(id  integer primary key autoincrement, orderId text, customerName text, customerAddress text, cardNumber text, exp_date text, secu_code integer, itemName text)',(err)=>{
-        console.log("2222")
               if(!err){
-                      console.log('table is created sucessfully!')
-                    //   db.run('INSERT INTO orderInfo(orderId, customerName,customerAddress, cardNumber, exp_date, secu_code, itemName) values("AAAA","Alex","188 harvest rose","4563888855742057","05/16","826","Table1")',(err)=>{
+                        console.log('table is created sucessfully!')
                         db.run('INSERT INTO orderInfo(orderId, customerName,customerAddress, cardNumber, exp_date, secu_code, itemName) values('+insertOrderData+')',(err)=>{
                         if(!err){
                             ans['stat']=1;
@@ -137,7 +137,8 @@ function insertOrder(insertOrderData){
 }
 
 // add new version number
-function addVersion(versionNum){
+// versionNum example: 6
+function insertVersion(versionNum){
   var db = new sqlite3.Database(dbPath,(err,data)=>{
     let ans={stat:"",content:""}
       if(!err){
@@ -167,7 +168,7 @@ function addVersion(versionNum){
   })
 }
 
-var iod='"ABDC","chao","188 harvest rose","4563888855742057","05/16","826","Table88"'
-addVersion(003)
-getInfoByID("version","versionNum",3)
+// var iod='"ABDC","chao","188 harvest rose","4563888855742057","05/16","826","Table88"'
+// addVersion(003)
+// getInfoByID("version","versionNum",3)
 
