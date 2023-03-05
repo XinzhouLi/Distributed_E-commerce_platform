@@ -39,5 +39,3 @@ ioWithLoadBalancer.on('connection', function (socket) {
     });
     
 });
-
-DB.createVersionTable()

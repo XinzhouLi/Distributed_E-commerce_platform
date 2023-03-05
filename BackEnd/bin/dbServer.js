@@ -1,13 +1,8 @@
 var sqlite3 = require("sqlite3");
-var express= require("express");
-let path=require("path");
-
-var app=express();
-app.use(express.json());
 var dbPath = '../db/master.db'
 // create chair table
 
-function creatChairTable() {
+function createChairTable() {
     var db = new sqlite3.Database(dbPath, (err, data) => {
         let ans = {stat: "", content: ""}
         if (!err) {
@@ -130,7 +125,7 @@ function editChairQuantity(inputJson){
 
 
 // create table table
-function creatTableTable(){
+function createTableTable(){
   var db = new sqlite3.Database(dbPath,(err,data)=>{
     let ans={stat:"",content:""}
       if(!err){
@@ -613,4 +608,23 @@ function createVersionTable(){
 }
 
 exports.createVersionTable = createVersionTable;
-exports.createChairTable =
+exports.createChairTable = createChairTable;
+exports.createTableTable = createTableTable;
+exports.createBedTable = createBedTable;
+exports.createSofaTable = createSofaTable;
+exports.editBedQuantity = editBedQuantity;
+exports.editChairQuantity = editChairQuantity;
+exports.editSofaQuantity = editSofaQuantity;
+exports.editTableQuantity = editTableQuantity;
+exports.getAllBedInfo = getAllBedInfo;
+exports.getAllChairInfo = getAllChairInfo;
+exports.getAllSofaInfo = getAllSofaInfo;
+exports.getAllTableinfo = getAllTableinfo;
+exports.getChairByID = getChairByID;
+exports.getOrderInfoById = getOrderInfoById;
+exports.getSingleBedInfoById = getSingleBedInfoById
+exports.getSingleSofaInfoById = getSingleSofaInfoById;
+exports.getSingleTableById = getSingleTableById;
+
+
+
