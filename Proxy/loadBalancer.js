@@ -4,7 +4,7 @@ let serverStatus = {
 }
 
 let serverCurrentTask = {
-    server1: 0
+    server1 : 0
 }
 
 let taskQueue = [];
@@ -20,7 +20,7 @@ let responseOrderInfo = 0;
 // listen to Front End Server: port 3010
 // const ioWithFrontEnd = require('socket.io')(3010);
 
-const ioWithFrontEnd = require('socket.io')(3010, {
+const ioWithFrontEnd = require('socket.io')(3012, {
     cors: {
       origin: '*',
     }
@@ -28,104 +28,116 @@ const ioWithFrontEnd = require('socket.io')(3010, {
 
 
 ioWithFrontEnd.on('connection', function (socketWithFrontEnd) {
-    console.log('connected:', socket.client.id);
+    console.log('connected:', socketWithFrontEnd.client.id);
     startTaskDistributing();
     // data: itemID
-    socketWithFrontEnd.on('requestSingleItem', function (data) {
+    socketWithFrontEnd.on('requestSingleItem', function(data){
         taskQueue.push("requestSingleItem");
         reqestSingleItem = data;
         // wait for 2 sec to let server complish task
-        let timeOut = timeOut(function () {
-            if (responseSingleItemInfo != 0) {
-                socketWithFrontEnd.emit('responseSingleItemInfo', responseSingleItemInfo);
-            } else {
-                console.log("Server Not Response!");
-                // if not success, add the task to the queue again
-                taskQueue.push("requestSingleItem");
-            }
+        let timeOut = setTimeout(function(){
+        if(responseSingleItemInfo != 0){
+            socketWithFrontEnd.emit('responseSingleItemInfo', responseSingleItemInfo);
+            reqestSingleItem = 0;
+            responseSingleItemInfo = 0;
+        }
+        else{
+            console.log("Server Not Response!");
+            // if not success, add the task to the queue again
+            taskQueue.push("requestSingleItem");
+        }
         }, 2000);
     });
 
     //data: category name
-    socketWithFrontEnd.on('requestAllCateInfo', function (data) {
+    socketWithFrontEnd.on('requestAllCateInfo', function(data){
         taskQueue.push("requestAllCateInfo");
         reqestAllCateInfo = data;
         // wait for 2 sec to let server complish task
-        let timeOut = timeOut(function () {
-            if (responseAllCateInfo != 0) {
-                socketWithFrontEnd.emit('responseAllCateInfo', responseAllCateInfo);
-            } else {
-                console.log("Server Not Response!");
-                taskQueue.push("requestAllCateInfo");
-            }
+        let timeOut = setTimeout(function(){
+        if(responseAllCateInfo != 0){
+            socketWithFrontEnd.emit('responseAllCateInfo', responseAllCateInfo);
+            reqestAllCateInfo = 0;
+            responseAllCateInfo = 0;
+        }
+        else{
+            console.log("Server Not Response!");
+            taskQueue.push("requestAllCateInfo");
+        }
         }, 2000);
     });
 
     //data: user info
-    socketWithFrontEnd.on('addOrder', function (data) {
+    socketWithFrontEnd.on('addOrder', function(data){
         taskQueue.push("addOrder");
         userInfo = data;
         // wait for 2 sec to let server complish task
-        let timeOut = timeOut(function () {
-            if (responseUserOrderStatus != 0) {
-                socketWithFrontEnd.emit('responseUserOrderStatus', "Your order has been successfully placed!");
-            } else {
-                console.log("Server Not Response!");
-                taskQueue.push("addOrder");
-            }
+        let timeOut = setTimeout(function(){
+        if(responseUserOrderStatus != 0){
+            socketWithFrontEnd.emit('responseUserOrderStatus', "Your order has been successfully placed!");
+            userInfo = 0;
+            responseUserOrderStatus = 0;
+        }
+        else{
+            console.log("Server Not Response!");
+            taskQueue.push("addOrder");
+        }
         }, 2000);
     });
 
     //data: order ID
-    socketWithFrontEnd.on('requestOrderInfo', function (data) {
+    socketWithFrontEnd.on('requestOrderInfo', function(data){
         taskQueue.push("requestOrderInfo");
         reqestOrderInfo = data;
         // wait for 2 sec to let server complish task
-        let timeOut = timeOut(function () {
-            if (responseOrderInfo != 0) {
-                socketWithFrontEnd.emit('responseOrderInfo', responseOrderInfo);
-            } else {
-                console.log("Server Not Response!");
-                taskQueue.push("requestOrderInfo");
-            }
+        let timeOut = setTimeout(function(){
+        if(responseOrderInfo != 0){
+            socketWithFrontEnd.emit('responseOrderInfo', responseOrderInfo);
+            reqestOrderInfo = 0;
+            responseOrderInfo = 0;
+        }
+        else{
+            console.log("Server Not Response!");
+            taskQueue.push("requestOrderInfo");
+        }
         }, 2000);
     });
 });
 
 function startTaskDistributing() {
-    let taskDistributing = setInterval(() => {
-        if (taskQueue.length != 0) {
-            for (let i = 0; i < taskQueue.length; i++) {
-                if (serverStatus.server1 == 0) {
+    let taskDistributing = setInterval( () => {
+        if(taskQueue.length != 0) {
+            for(let i = 0; i < taskQueue.length; i++) {
+                if(serverStatus.server1 == 0) {
                     serverCurrentTask.server1 = taskQueue[i];
                     // remove the first task
                     taskQueue.shift();
                 }
                 // ********** edit later**************
-                // else if(serverStatus.server2 == 0) {
-                //     serverCurrentTask.server2 = taskQueue[i];
+            // else if(serverStatus.server2 == 0) {
+            //     serverCurrentTask.server2 = taskQueue[i];
                 //    // remove the first task
                 //    taskQueue.shift();
-                // }
-                // else if(serverStatus.server3 == 0) {
-                //     serverCurrentTask.server3 = taskQueue[i];
-                //    // remove the first task
+            // }
+            // else if(serverStatus.server3 == 0) {
+            //     serverCurrentTask.server3 = taskQueue[i];
+            //    // remove the first task
                 //    taskQueue.shift();
-                // }
-                // else if(serverStatus.server4 == 0) {
-                //     serverCurrentTask.server4 = taskQueue[i];
-                //    // remove the first task
+            // }
+            // else if(serverStatus.server4 == 0) {
+            //     serverCurrentTask.server4 = taskQueue[i];
+            //    // remove the first task
                 //    taskQueue.shift();
-                // }
-                // else if(serverStatus.server5 == 0) {
-                //     serverCurrentTask.server5 = taskQueue[i];
-                //    // remove the first task
+            // }
+            // else if(serverStatus.server5 == 0) {
+            //     serverCurrentTask.server5 = taskQueue[i];
+            //    // remove the first task
                 //    taskQueue.shift();
-                // }
+            // }
             }
-
+            
         }
-    }, 1000 / 50);
+    }, 1000/50); 
 }
 
 
@@ -138,42 +150,44 @@ var socketWithS1 = ioWithServer1.connect("http://localhost:5100/", {
 socketWithS1.on('connect', function () {
     console.log('connected to localhost:5100');
 
-    if (serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestSingleItem") {
-        serverStatus.server1 = 1;
-        socketWithS1.emit('requestSingleItem', reqestSingleItem);
-        socketWithS1.on('responseSingleItemInfo', function (data) {
-            responseSingleItemInfo = data;
-        });
-        serverStatus.server1 = 0;
-    }
-
-    if (serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestAllCateInfo") {
-        serverStatus.server1 = 1;
-        socketWithS1.emit('requestAllCateInfo', reqestAllCateInfo);
-        socketWithS1.on('responseAllCateInfo', function (data) {
-            responseAllCateInfo = data;
-        });
-        serverStatus.server1 = 0;
-    }
-
-    if (serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "addOrder") {
-        serverStatus.server1 = 1;
-        socketWithS1.emit('addOrder', userInfo);
-        // expected data == 1, means that add order is done
-        socketWithS1.on('responseUserOrderStatus', function (data) {
-            responseUserOrderStatus = data;
-        });
-        serverStatus.server1 = 0;
-    }
-
-    if (serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestOrderInfo") {
-        serverStatus.server1 = 1;
-        socketWithS1.emit('requestOrderInfo', reqestOrderInfo);
-        socketWithS1.on('responseOrderInfo', function (data) {
-            responseOrderInfo = data;
-        });
-        serverStatus.server1 = 0;
-    }
+    let timeOut = setInterval(() => {
+        if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestSingleItem") {
+            serverStatus.server1 = 1;
+            socketWithS1.emit('requestSingleItem', reqestSingleItem);
+            socketWithS1.on('responseSingleItemInfo', function(data){
+                responseSingleItemInfo = data;
+            });
+            serverStatus.server1 = 0;
+        }
+    
+        if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestAllCateInfo") {
+            serverStatus.server1 = 1;
+            socketWithS1.emit('requestAllCateInfo', reqestAllCateInfo);
+            socketWithS1.on('responseAllCateInfo', function(data){
+                responseAllCateInfo = data;
+            });
+            serverStatus.server1 = 0;
+        }
+    
+        if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "addOrder") {
+            serverStatus.server1 = 1;
+            socketWithS1.emit('addOrder', userInfo);
+            // expected data == 1, means that add order is done
+            socketWithS1.on('responseUserOrderStatus', function(data){
+                responseUserOrderStatus = data;
+            });
+            serverStatus.server1 = 0;
+        }
+    
+        if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestOrderInfo") {
+            serverStatus.server1 = 1;
+            socketWithS1.emit('requestOrderInfo', reqestOrderInfo);
+            socketWithS1.on('responseOrderInfo', function(data){
+                responseOrderInfo = data;
+            });
+            serverStatus.server1 = 0;
+        }
+    }, 1000);
 });
 
 

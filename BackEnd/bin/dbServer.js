@@ -171,5 +171,5 @@ exports.insertOrder = insertOrder;
 // addVersion(003)
 // getInfoByID("version","versionNum",3)
 
-let tempdb = new SQL.Database();
-tempdb.exec(".dump")
+// let tempdb = new SQL.Database();
+// tempdb.exec(".dump")

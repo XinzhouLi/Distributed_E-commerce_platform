@@ -16,8 +16,9 @@ ioWithLoadBalancer.on('connection', function (socket) {
     socket.on('requestAllCateInfo', function(data) {
         // ***** Edit ******
         // connect to dbserver
-        let Jobj = JSON.parse(data);
+        let Jobj = data;
         let response = DB.getAllInfo(Jobj.tableName);
+        console.log(response)
         // ***** EDit ******
         socket.emit('responseAllCateInfo', response);
     });
@@ -44,23 +45,23 @@ ioWithLoadBalancer.on('connection', function (socket) {
     
 });
 
-
-function copyDB(){
-    fs.copyFile('../db/master.db', './db/slave1.db', (err) => {
-        if (err) throw err;
-        console.log('master.db was copied to slave1.db');
-    });
-    fs.copyFile('./db/master.db', './db/slave2.db', (err) => {
-        if (err) throw err;
-        console.log('master.db was copied to slave2.db');
-    });
-    fs.copyFile('./db/master.db', './db/slave3.db', (err) => {
-        if (err) throw err;
-        console.log('master.db was copied to slave3.db');
-    });
-    fs.copyFile('./db/master.db', './db/slave4.db', (err) => {
-        if (err) throw err;
-        console.log('master.db was copied to slave4.db');
-    });
-}
-setInterval(copyDB, 3000);
+//
+// function copyDB(){
+//     fs.copyFile('../db/master.db', './db/slave1.db', (err) => {
+//         if (err) throw err;
+//         console.log('master.db was copied to slave1.db');
+//     });
+//     fs.copyFile('./db/master.db', './db/slave2.db', (err) => {
+//         if (err) throw err;
+//         console.log('master.db was copied to slave2.db');
+//     });
+//     fs.copyFile('./db/master.db', './db/slave3.db', (err) => {
+//         if (err) throw err;
+//         console.log('master.db was copied to slave3.db');
+//     });
+//     fs.copyFile('./db/master.db', './db/slave4.db', (err) => {
+//         if (err) throw err;
+//         console.log('master.db was copied to slave4.db');
+//     });
+// }
+// setInterval(copyDB, 3000);
