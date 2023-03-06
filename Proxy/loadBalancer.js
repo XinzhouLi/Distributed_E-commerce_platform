@@ -20,7 +20,7 @@ let responseOrderInfo = 0;
 // listen to Front End Server: port 3010
 // const ioWithFrontEnd = require('socket.io')(3010);
 
-const ioWithFrontEnd = require('socket.io')(3010, {
+const ioWithFrontEnd = require('socket.io')(3011, {
     cors: {
       origin: '*',
     }
@@ -143,7 +143,7 @@ function startTaskDistributing() {
 
 // make connection with Server 1: port 5100
 var ioWithServer1 = require('socket.io-client');
-var socketWithS1 = ioWithServer1.connect("http://localhost:5100/", {
+var socketWithS1 = ioWithServer1.connect("http://localhost:5101/", {
     reconnection: true
 });
 
@@ -166,7 +166,7 @@ socketWithS1.on('connect', function () {
             socketWithS1.emit('requestAllCateInfo', reqestAllCateInfo);
             serverCurrentTask.server1 = 0;
             socketWithS1.on('responseAllCateInfo', function(data){
-                console.log(data);
+                console.log(JSON.parse(data));
                 responseAllCateInfo = data;
             });
             serverStatus.server1 = 0;
