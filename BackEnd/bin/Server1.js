@@ -20,7 +20,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
         let response = DB.getAllInfo(Jobj.tableName);
         console.log(response)
         // ***** EDit ******
-        socket.emit('responseAllCateInfo', response);
+        socket.emit('responseAllCateInfo', JSON.stringify(response));
     });
 
     socket.on('addOrder', function(data) {
