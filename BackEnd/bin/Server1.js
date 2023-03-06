@@ -18,7 +18,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
         // connect to dbserver
         let Jobj = data;
         let response = DB.getAllInfo(Jobj.tableName);
-        console.log(response)
+
         // ***** EDit ******
         socket.emit('responseAllCateInfo', response);
     });
