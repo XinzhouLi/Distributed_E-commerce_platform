@@ -6,6 +6,8 @@ const ioWithFrontEnd = require('socket.io')(3012, {
 let totalNumServer = 1;
 let NumOfUser = 0;
 let currentServer = 0;
+let frontSockets = {};
+
 //init server socket
 let ioWithServer1 = require('socket.io-client');
 let socketWithS1 = ioWithServer1.connect("http://localhost:5100/", {
@@ -20,16 +22,17 @@ ioWithFrontEnd.on("connection", function (socketWithFront) {
     NumOfUser++;
     // Listen to the Event
     socketWithFront.on('requestAllCateInfo', function(data){
-        console.log('LB: front request all list: ' + data.tableName)
+        console.log('LB: front request all list: ' + data.tableName);
         // Send the request to current server
-        serverList[currentServer].emit('requestAllCateInfo',data)
-        serverList[currentServer].on("responseAllCateInfo", function(response){
-            console.log('LB: Server send back: ' + JSON.parse(response))
+        serverList[currentServer].emit('requestAllCateInfo',data);
+        serverList[currentServer].once("responseAllCateInfo", function(response){
+            console.log('LB: Server send back: ' + response + '\n   to ' + socketWithFront.id);
             // Send the request back to front end
-            socketWithFront.emit("responseAllCateInfo", response)
-            currentServer = currentServer % totalNumServer
-            console.log(response)
+            socketWithFront.emit("responseAllCateInfo", response);
+            currentServer++;
+            currentServer = currentServer % totalNumServer;
         })
     })
 })
+
 

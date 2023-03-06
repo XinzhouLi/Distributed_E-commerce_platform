@@ -8,7 +8,7 @@ app.use(express.json());
 var dbPath = '../db/master.db'
 
 let responseAllCateInfo;
-const ioWithLoadBalancer = require('socket.io')(5101);
+const ioWithLoadBalancer = require('socket.io')(5100);
 ioWithLoadBalancer.on('connection', function (socket) {
     console.log('connected:', socket.client.id);
 
@@ -28,7 +28,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
             let l = setTimeout(()=>{
             console.log(responseAllCateInfo);
             socket.emit('responseAllCateInfo', JSON.stringify(responseAllCateInfo));
-            },1000/10);
+            },1000/5);
         })
     });
 
