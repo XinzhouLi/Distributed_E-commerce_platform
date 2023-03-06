@@ -1,6 +1,14 @@
 const DB = require('./dbServer')
 const {response} = require("express");
-const ioWithLoadBalancer = require('socket.io')(5100);
+var sqlite3 = require("sqlite3");
+var express = require("express");
+
+var app = express();
+app.use(express.json());
+var dbPath = '../db/master.db'
+
+let responseAllCateInfo;
+const ioWithLoadBalancer = require('socket.io')(5101);
 ioWithLoadBalancer.on('connection', function (socket) {
     console.log('connected:', socket.client.id);
 
@@ -14,13 +22,21 @@ ioWithLoadBalancer.on('connection', function (socket) {
     });
 
     socket.on('requestAllCateInfo', function(data) {
-        // ***** Edit ******
-        // connect to dbserver
         let Jobj = data;
+<<<<<<< Updated upstream
         let response = DB.getAllInfo(Jobj.tableName);
 
         // ***** EDit ******
         socket.emit('responseAllCateInfo', JSON.stringify(response));
+=======
+        let p = new Promise((resolve, reject) =>{
+            resolve(getAllInfo(Jobj.tableName));
+            let l = setTimeout(()=>{
+            console.log(responseAllCateInfo);
+            socket.emit('responseAllCateInfo', JSON.stringify(responseAllCateInfo));
+            },1000/10);
+        })
+>>>>>>> Stashed changes
     });
 
     socket.on('addOrder', function(data) {
@@ -65,3 +81,25 @@ ioWithLoadBalancer.on('connection', function (socket) {
 //     });
 // }
 // setInterval(copyDB, 3000);
+
+
+function getAllInfo(tableName) {
+    var db = new sqlite3.Database(dbPath, (err, data) => {
+        let ans = {stat: "", content: ""}
+        if (!err) {
+            db.all('SELECT * FROM "' + tableName + '"', (err, data) => {
+                if (!err) {
+                    // console.log(typeof data)
+                    // console.log(data)
+                    ans['stat'] = 1;
+                    ans['content'] = data;
+                    responseAllCateInfo = ans;
+                } else {
+                    ans['stat'] = 0;
+                    ans['content'] = "sorry did not find  '" + tableName + "' info";
+                    console.log(err.message)
+                }
+            })
+        }
+    })
+}
