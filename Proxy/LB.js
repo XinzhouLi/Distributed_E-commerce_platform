@@ -3,23 +3,32 @@ const ioWithFrontEnd = require('socket.io')(3012, {
         origin: '*',
     }
 });
+let totalNumServer = 1;
 let NumOfUser = 0;
-let nextSever = 0;
+let currentServer = 0;
 //init server socket
-var ioWithServer1 = require('socket.io-client');
-var socketWithS1 = ioWithServer1.connect("http://localhost:5100/", {
+let ioWithServer1 = require('socket.io-client');
+let socketWithS1 = ioWithServer1.connect("http://localhost:5100/", {
     reconnection: true
 });
 
-let serverList = [ioWithServer1]
+const serverList = new Array(socketWithS1)
 
+// Connect with frontend
 ioWithFrontEnd.on("connection", function (socketWithFront) {
-    console.log('LB: connected:', socketWithFront.client.id);
+    console.log('LB: front end connected:', socketWithFront.client.id);
     NumOfUser++;
-    socketWithFront.on('requestSingleItem', function(data){
-        serverList[nextSever].emit('requestSingleItem',data)
-        serverList[nextSever].on("responseAllCateInfo", function(response){
+    // Listen to the Event
+    socketWithFront.on('requestAllCateInfo', function(data){
+        console.log('LB: front request all list: ' + data.tableName)
+        // Send the request to current server
+        serverList[currentServer].emit('requestAllCateInfo',data)
+        serverList[currentServer].on("responseAllCateInfo", function(response){
+            console.log('LB: Server send back: ' + JSON.parse(response))
+            // Send the request back to front end
             socketWithFront.emit("responseAllCateInfo", response)
+            currentServer = currentServer % totalNumServer
+            console.log(response)
         })
     })
 })
