@@ -20,7 +20,7 @@ let responseOrderInfo = 0;
 // listen to Front End Server: port 3010
 // const ioWithFrontEnd = require('socket.io')(3010);
 
-const ioWithFrontEnd = require('socket.io')(3012, {
+const ioWithFrontEnd = require('socket.io')(3010, {
     cors: {
       origin: '*',
     }
@@ -150,10 +150,11 @@ var socketWithS1 = ioWithServer1.connect("http://localhost:5100/", {
 socketWithS1.on('connect', function () {
     console.log('connected to localhost:5100');
 
-    let timeOut = setInterval(() => {
+    let timeInterval = setInterval(() => {
         if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestSingleItem") {
             serverStatus.server1 = 1;
             socketWithS1.emit('requestSingleItem', reqestSingleItem);
+            serverCurrentTask.server1 = 0;
             socketWithS1.on('responseSingleItemInfo', function(data){
                 responseSingleItemInfo = data;
             });
@@ -163,7 +164,9 @@ socketWithS1.on('connect', function () {
         if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestAllCateInfo") {
             serverStatus.server1 = 1;
             socketWithS1.emit('requestAllCateInfo', reqestAllCateInfo);
+            serverCurrentTask.server1 = 0;
             socketWithS1.on('responseAllCateInfo', function(data){
+                console.log(data);
                 responseAllCateInfo = data;
             });
             serverStatus.server1 = 0;
@@ -172,6 +175,7 @@ socketWithS1.on('connect', function () {
         if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "addOrder") {
             serverStatus.server1 = 1;
             socketWithS1.emit('addOrder', userInfo);
+            serverCurrentTask.server1 = 0;
             // expected data == 1, means that add order is done
             socketWithS1.on('responseUserOrderStatus', function(data){
                 responseUserOrderStatus = data;
@@ -182,6 +186,7 @@ socketWithS1.on('connect', function () {
         if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestOrderInfo") {
             serverStatus.server1 = 1;
             socketWithS1.emit('requestOrderInfo', reqestOrderInfo);
+            serverCurrentTask.server1 = 0;
             socketWithS1.on('responseOrderInfo', function(data){
                 responseOrderInfo = data;
             });
