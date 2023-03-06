@@ -17,9 +17,16 @@ let responseUserOrderStatus = 0;
 let reqestOrderInfo = 0;
 let responseOrderInfo = 0;
 
-
 // listen to Front End Server: port 3010
-const ioWithFrontEnd = require('socket.io')(3010);
+// const ioWithFrontEnd = require('socket.io')(3010);
+
+const ioWithFrontEnd = require('socket.io')(3010, {
+    cors: {
+      origin: '*',
+    }
+  });
+
+
 ioWithFrontEnd.on('connection', function (socketWithFrontEnd) {
     console.log('connected:', socket.client.id);
     startTaskDistributing();
