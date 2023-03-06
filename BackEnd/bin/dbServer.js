@@ -5,6 +5,138 @@ var app = express();
 app.use(express.json());
 var dbPath = '../db/master.db'
 
+
+
+var fs = require('fs');
+var exec = require('child_process').exec;
+
+//let flag = true;
+function CopyDB(){
+    //if (flag){
+    exec('sqlite3 ../db/master.db .dump > ../db/master.sql',
+        function (error, stdout, stderr) {
+        if (error !== null) {
+             console.log('exec error: ' + error);
+        }
+        
+    console.log('master sql created');
+        //flag = false;
+    //}
+    //else{
+    fs.stat('../db/slave1.db', function (err, stats) {
+        //console.log(stats);//here we got all information of file in stats variable
+        fs.unlink('./db/slave1.db',function(err){
+        if(err) {
+            exec('sqlite3 ../db/slave1.db < ../db/master.sql',
+            function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
+            });
+            console.log('slave1 sql updated');
+            //return console.log(err);
+        }
+        else{s
+            exec('sqlite3 ../db/slave1.db < ../db/master.sql',
+            function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
+            });
+            console.log('slave1 sql updated');
+        }
+        });  
+    });
+
+    fs.stat('../db/slave2.db', function (err, stats) {
+        //console.log(stats);//here we got all information of file in stats variable
+        fs.unlink('../db/slave2.db',function(err){
+        if(err) {
+            exec('sqlite3 ../db/slave2.db < ../db/master.sql',
+            function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
+            });
+            console.log('slave2 sql updated');
+            //return console.log(err);
+        }
+        else{
+            exec('sqlite3 ../db/slave2.db < ../db/master.sql',
+            function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
+            });
+        
+            console.log('slave2 sql updated');
+            //return console.log(err);
+        }
+        });  
+    });
+
+    fs.stat('../db/slave3.db', function (err, stats) {
+        //console.log(stats);//here we got all information of file in stats variable
+        fs.unlink('../db/slave3.db',function(err){
+        if(err) {
+            exec('sqlite3 ../db/slave3.db < ../db/master.sql',
+            function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
+            });
+            console.log('slave3 sql updated');
+            //return console.log(err);
+        }
+        else{
+            exec('sqlite3 ../db/slave3.db < ../db/master.sql',
+            function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
+            });
+            console.log('slave3 sql updated');
+            //return console.log(err);
+        }
+        });  
+    });
+
+    fs.stat('../db/slave4.db', function (err, stats) {
+        //console.log(stats);//here we got all information of file in stats variable
+        fs.unlink('./db/slave4.db',function(err){
+        if(err) {
+            exec('sqlite3 ../db/slave4.db < ../db/master.sql',
+            function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
+            });
+            console.log('slave4 sql updated');
+            //return console.log(err);
+        }
+        else{
+            exec('sqlite3 ../db/slave4.db < ../db/master.sql',
+            function (error, stdout, stderr) {
+                if (error !== null) {
+                    console.log('exec error: ' + error);
+                }
+            });
+            console.log('slave4 sql updated');
+            //return console.log(err);
+        }
+        });  
+    });
+    //flag = true;
+//}
+});
+}
+
+setInterval(CopyDB, 10000);
+
+
+
+
+
 // search all table
 // tableName example: chair 
 function getAllInfo(tableName) {
@@ -160,6 +292,8 @@ function insertVersion(versionNum) {
         }
     })
 }
+
+getAllInfo("chair")
 
 exports.insertVersion = insertVersion;
 exports.getAllInfo = getAllInfo;
