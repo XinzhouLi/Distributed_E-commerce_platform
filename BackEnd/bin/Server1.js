@@ -23,12 +23,6 @@ ioWithLoadBalancer.on('connection', function (socket) {
 
     socket.on('requestAllCateInfo', function(data) {
         let Jobj = data;
-<<<<<<< Updated upstream
-        let response = DB.getAllInfo(Jobj.tableName);
-
-        // ***** EDit ******
-        socket.emit('responseAllCateInfo', JSON.stringify(response));
-=======
         let p = new Promise((resolve, reject) =>{
             resolve(getAllInfo(Jobj.tableName));
             let l = setTimeout(()=>{
@@ -36,7 +30,6 @@ ioWithLoadBalancer.on('connection', function (socket) {
             socket.emit('responseAllCateInfo', JSON.stringify(responseAllCateInfo));
             },1000/10);
         })
->>>>>>> Stashed changes
     });
 
     socket.on('addOrder', function(data) {
