@@ -14,13 +14,13 @@ let reqestAllCateInfo = 0;
 let responseAllCateInfo = 0;
 let userInfo = 0;
 let responseUserOrderStatus = 0;
-let reqestOrderInfo = 0;
-let responseOrderInfo = 0;
+// let reqestOrderInfo = 0;
+// let responseOrderInfo = 0;
 
 // listen to Front End Server: port 3010
 // const ioWithFrontEnd = require('socket.io')(3010);
 
-const ioWithFrontEnd = require('socket.io')(3011, {
+const ioWithFrontEnd = require('socket.io')(3010, {
     cors: {
       origin: '*',
     }
@@ -85,23 +85,23 @@ ioWithFrontEnd.on('connection', function (socketWithFrontEnd) {
         }, 2000);
     });
 
-    //data: order ID
-    socketWithFrontEnd.on('requestOrderInfo', function(data){
-        taskQueue.push("requestOrderInfo");
-        reqestOrderInfo = data;
-        // wait for 2 sec to let server complish task
-        let timeOut = setTimeout(function(){
-        if(responseOrderInfo != 0){
-            socketWithFrontEnd.emit('responseOrderInfo', responseOrderInfo);
-            reqestOrderInfo = 0;
-            responseOrderInfo = 0;
-        }
-        else{
-            console.log("Server Not Response!");
-            taskQueue.push("requestOrderInfo");
-        }
-        }, 2000);
-    });
+    // //data: order ID
+    // socketWithFrontEnd.on('requestOrderInfo', function(data){
+    //     taskQueue.push("requestOrderInfo");
+    //     reqestOrderInfo = data;
+    //     // wait for 2 sec to let server complish task
+    //     let timeOut = setTimeout(function(){
+    //     if(responseOrderInfo != 0){
+    //         socketWithFrontEnd.emit('responseOrderInfo', responseOrderInfo);
+    //         reqestOrderInfo = 0;
+    //         responseOrderInfo = 0;
+    //     }
+    //     else{
+    //         console.log("Server Not Response!");
+    //         taskQueue.push("requestOrderInfo");
+    //     }
+    //     }, 2000);
+    // });
 });
 
 function startTaskDistributing() {
@@ -183,15 +183,15 @@ socketWithS1.on('connect', function () {
             serverStatus.server1 = 0;
         }
     
-        if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestOrderInfo") {
-            serverStatus.server1 = 1;
-            socketWithS1.emit('requestOrderInfo', reqestOrderInfo);
-            serverCurrentTask.server1 = 0;
-            socketWithS1.on('responseOrderInfo', function(data){
-                responseOrderInfo = data;
-            });
-            serverStatus.server1 = 0;
-        }
+        // if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestOrderInfo") {
+        //     serverStatus.server1 = 1;
+        //     socketWithS1.emit('requestOrderInfo', reqestOrderInfo);
+        //     serverCurrentTask.server1 = 0;
+        //     socketWithS1.on('responseOrderInfo', function(data){
+        //         responseOrderInfo = data;
+        //     });
+        //     serverStatus.server1 = 0;
+        // }
     }, 1000);
 });
 
