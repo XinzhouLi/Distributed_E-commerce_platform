@@ -53,6 +53,7 @@ ioWithFrontEnd.on('connection', function (socketWithFrontEnd) {
     socketWithFrontEnd.on('requestAllCateInfo', function(data){
         taskQueue.push("requestAllCateInfo");
         reqestAllCateInfo = data;
+        console.log(data)
         // wait for 2 sec to let server complish task
         let timeOut = setTimeout(function(){
         if(responseAllCateInfo != 0){

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component,useState, useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import {Container, Row, Col, Button, Alert, Breadcrumb, Card, Form } from 'react-bootstrap';
@@ -10,40 +10,45 @@ import Item from './Pages/Item';
 import Payment from './Pages/Payment';
 import Test from "./Pages/Test";
 
+import socketConfig from './socketConfig.js';
 
 
-class App extends Component { 
+  // let io = require("socket.io-client")
+  // let socket = io.connect("http://localhost:3010/",{
+  //   reconnection: true 
+  // })
 
-  // constructor(props){
-  //   super(props);
-  //   this.state = { apiResponse: "" };
-  // }
+  // socket.on('connect', function (socketWithLoadBalancer) {
+  //   console.log('connected to localhost:3010')
+  //   socket.emit("requestAllCateInfo","chair")
+  // });
   
-  // callAPI() {
-  //   fetch("http://localhost:9000/testAPI")
-  //       .then(res => res.text())
-  //       .then(res => this.setState({ apiResponse: res }));
-  // }
-  
-  // componentWillMount() {
-  //   this.callAPI();
-  // }
+function App (){ 
 
-  render(){
+  const [socket, setSocket] = useState(socketConfig,{
+    reconnection: true 
+  });
+
+  useEffect(()=>{
+    socket.on('connect', function () {
+        console.log('connected to localhost:3010')
+        socket.emit("handleTest","testMessage")
+      });
+  })
+
     return(
       <div className="App">
-        <Router>
-          <Routes>
-            <Route path='/' element={<MainPage />}/>
-            <Route path='/Chair' element={<Chair />}/>
-            <Route path='/Test' element={<Test />}/>
-            <Route path='/Item' element={<Item />}/>
-            <Route path='*' element={<MainPage />}/>
-          </Routes>
-        </Router>
+          <Router>
+            <Routes>
+              <Route path='/' element={<MainPage />}/>
+              <Route path='/Chair' element={<Chair />}/>
+              <Route path='/Test' element={<Test />}/>
+              <Route path='/Item' element={<Item />}/>
+              <Route path='*' element={<MainPage />}/>
+            </Routes>
+          </Router>
       </div> 
     );
   }
-}
 
 export default App;

@@ -9,7 +9,7 @@ function Chair() {
   const [goToChair1, setGoToChair1] = React.useState(false)
 
   if(goToChair1){
-    return <Navigate to= "/Chair1"/>
+    return <Navigate to= "/Chair1"/>    
   }
 
   return (
