@@ -8,7 +8,6 @@ import MainPage from './Pages/MainPage';
 import Chair from './Pages/Chair';
 import Item from './Pages/Item';
 import Payment from './Pages/Payment';
-import Test from "./Pages/Test";
 
 import socketConfig from './socketConfig.js';
 
@@ -42,7 +41,6 @@ function App (){
             <Routes>
               <Route path='/' element={<MainPage />}/>
               <Route path='/Chair' element={<Chair />}/>
-              <Route path='/Test' element={<Test />}/>
               <Route path='/Item' element={<Item />}/>
               <Route path='*' element={<MainPage />}/>
             </Routes>
