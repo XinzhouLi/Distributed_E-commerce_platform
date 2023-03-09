@@ -1,11 +1,7 @@
 // const DB = require('./dbServer')
-const {response} = require("express");
 var sqlite3 = require("sqlite3");
-var express = require("express");
 
-var app = express();
-app.use(express.json());
-var dbPath = '../db/master.db'
+var dbPath = 'db/master.db'
 
 var fs = require('fs');
 var exec = require('child_process').exec;

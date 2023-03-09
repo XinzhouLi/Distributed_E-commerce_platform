@@ -20,7 +20,7 @@ let responseUserOrderStatus = 0;
 // listen to Front End Server: port 3010
 // const ioWithFrontEnd = require('socket.io')(3010);
 
-const ioWithFrontEnd = require('socket.io')(3010, {
+const ioWithFrontEnd = require('socket.io')(3012, {
     cors: {
       origin: '*',
     }
@@ -67,6 +67,7 @@ ioWithFrontEnd.on('connection', function (socketWithFrontEnd) {
         }
         }, 2000);
     });
+
 
     //data: user info
     socketWithFrontEnd.on('addOrder', function(data){
