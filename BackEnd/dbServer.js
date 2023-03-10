@@ -300,10 +300,3 @@ exports.getAllInfo = getAllInfo;
 exports.getInfoByID = getInfoByID;
 exports.editItemQuantity = editItemQuantity;
 exports.insertOrder = insertOrder;
-
-// var iod='"ABDC","chao","188 harvest rose","4563888855742057","05/16","826","Table88"'
-// addVersion(003)
-// getInfoByID("version","versionNum",3)
-
-// let tempdb = new SQL.Database();
-// tempdb.exec(".dump")
