@@ -6,13 +6,28 @@ var dbPath = 'db/master.db'
 var fs = require('fs');
 var exec = require('child_process').exec;
 
+let dbID = "s0";
+// default master = -1
+let isMaster = 0;
+let master = -1;
+
 let responseAllCateInfo;
 let responseSingleItemInfo;
 let responseUserOrderStatus;
 let editResult;
-const ioWithLoadBalancer = require('socket.io')(5101);
+
+let aliveServers = {
+    s1: 0,
+    s2: 0,
+    s3: 0
+};
+
+let numNoMaster = 1;
+
+// port 5100: connect with load balancer
+const ioWithLoadBalancer = require('socket.io')(5100);
 ioWithLoadBalancer.on('connection', function (socket) {
-    console.log('connected:', socket.client.id);
+    console.log('Server 1 connected with Load Balancer:', socket.client.id);
 
     socket.on('requestSingleItem', function(data) {
         let Jobj = data;
@@ -331,4 +346,124 @@ function CopyDB(){
 });
 }
 
-setInterval(CopyDB, 10000);
+//setInterval(CopyDB, 10000);
+
+// connect with other servers
+
+//port 5120 connects with server 2
+const ioWithServer2 = require('socket.io')(5120);
+ioWithServer2.on('connection', async function (socket) {
+    console.log('Server 1 connected with Server 2:', socket.client.id);
+    aliveServers.s1 = 1;
+
+    // first leader election
+    socket.emit('requestMaster');
+    socket.on('responseMaster', function(data){
+        if(data == -1 && master == -1){
+            numNoMaster ++;
+            // more than half servers have no master
+            if(numNoMaster>2){
+                // start leader election
+                numNoMaster = 0;
+                console.log("start leader election");
+            }
+        }
+        else if(data != -1){
+            master = data;
+        }
+    });
+
+    socket.on('requestMaster', function(){
+        socket.emit('responseMaster',master);
+    });
+    
+    socket.on('disconnect', function(){
+        console.log("Server 2 failed!");
+        socket.disconnect();
+        aliveServers.s1 = 0;
+        // inform other active servers to record server state
+        
+        if(master == 1){
+            //start leader election
+        }
+    })
+});
+
+
+//port 5130 connects with server 3
+const ioWithServer3 = require('socket.io')(5130);
+ioWithServer3.on('connection', async function (socket) {
+    console.log('Server 1 connected with Server 3:', socket.client.id);
+    aliveServers.s2 = 1;
+
+    // first leader election
+    socket.emit('requestMaster');
+    socket.on('responseMaster', function(data){
+        if(data == -1 && master == -1){
+            numNoMaster ++;
+            // more than half servers have no master
+            if(numNoMaster>2){
+                // start leader election
+                numNoMaster = 0;
+                console.log("start leader election");
+            }
+        }
+        else if(data != -1){
+            master = data;
+        }
+    });
+
+    socket.on('requestMaster', function(){
+        socket.emit('responseMaster',master);
+    });
+    
+    socket.on('disconnect', function(){
+        console.log("Server 3 failed!");
+        socket.disconnect();
+        aliveServers.s2 = 0;
+        // inform other active servers to record server state
+        
+        if(master == 2){
+            //start leader election
+        }
+    })
+});
+
+//port 5140 connects with server 4
+const ioWithServer4 = require('socket.io')(5140);
+ioWithServer4.on('connection', async function (socket) {
+    console.log('Server 1 connected with Server 4:', socket.client.id);
+    aliveServers.s3 = 1;
+
+    // first leader election
+    socket.emit('requestMaster');
+    socket.on('responseMaster', function(data){
+        if(data == -1 && master == -1){
+            numNoMaster ++;
+            // more than half servers have no master
+            if(numNoMaster>2){
+                // start leader election
+                numNoMaster = 0;
+                console.log("start leader election");
+            }
+        }
+        else if(data != -1){
+            master = data;
+        }
+    });
+
+    socket.on('requestMaster', function(){
+        socket.emit('responseMaster',master);
+    });
+    
+    socket.on('disconnect', function(){
+        console.log("Server 4 failed!");
+        socket.disconnect();
+        aliveServers.s3 = 0;
+        // inform other active servers to record server state
+        
+        if(master == 3){
+            //start leader election
+        }
+    })
+});
