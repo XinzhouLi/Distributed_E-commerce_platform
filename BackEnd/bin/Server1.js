@@ -5,7 +5,7 @@ var express = require("express");
 
 var app = express();
 app.use(express.json());
-var dbPath = '../db/master.db'
+var dbPath = "./BackEnd/db/master.db";
 
 var fs = require('fs');
 var exec = require('child_process').exec;
@@ -31,6 +31,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
 
     socket.on('requestAllCateInfo', function(data) {
         let Jobj = data;
+        console.log(data);
         let p = new Promise((resolve, reject) =>{
             resolve(getAllInfo(Jobj.tableName));
             let l = setTimeout(()=>{
@@ -91,13 +92,14 @@ ioWithLoadBalancer.on('connection', function (socket) {
 
 
 function getAllInfo(tableName) {
+    console.log(tableName)
     var db = new sqlite3.Database(dbPath, (err, data) => {
         let ans = {stat: "", content: ""}
         if (!err) {
             db.all('SELECT * FROM "' + tableName + '"', (err, data) => {
                 if (!err) {
                     // console.log(typeof data)
-                    // console.log(data)
+                    console.log(data)
                     ans['stat'] = 1;
                     ans['content'] = data;
                     responseAllCateInfo = ans;
@@ -107,6 +109,9 @@ function getAllInfo(tableName) {
                     console.log(err.message)
                 }
             })
+        }else{
+            console.log(dbPath)
+            console.log(err.message)
         }
     })
 }
