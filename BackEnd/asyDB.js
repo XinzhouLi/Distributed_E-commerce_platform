@@ -1,81 +1,53 @@
-const dbimport = require("./dbFile")
-const db = new dbimport.Database();
-
-exports.
+const dbFile = require("./dbDAO")
 
 
-
-exports.open=function(path) {
-    return new Promise(function(resolve) {
-        this.db = new sqlite3.Database(path,
-            function(err) {
-                if(err) reject("Open error: "+ err.message)
-                else    resolve(path + " opened")
-            }
-        )
-    })
+async function getAllInfo(tableName){
+    let db = new dbFile.Database();
+    await db.connect();
+    let query = 'SELECT * FROM ' + tableName
+    // console.log(query)
+    let result = await db.all(query);
+    // console.log(result);
 }
 
-// any query: insert/delete/update
-exports.run=function(query) {
-    return new Promise(function(resolve, reject) {
-        this.db.run(query,
-            function(err)  {
-                if(err) reject(err.message)
-                else    resolve(true)
-            })
-    })
+async function getInfoByID(tableName, idName, id){
+    let db = new dbFile.Database();
+    await db.connect();
+    let query = 'SELECT * FROM '+ tableName +' WHERE "' + idName + '" = "' + id +'"'
+    // console.log(query)
+    let result  = await db.get(query)
+    // console.log(result[0])
 }
 
-// first row read
-exports.get=function(query, params) {
-    return new Promise(function(resolve, reject) {
-        this.db.get(query, params, function(err, row)  {
-            if(err) reject("Read error: " + err.message)
-            else {
-                resolve(row)
-            }
-        })
-    })
+async function editItemQuantity(tableName, idName, id, quantityToBuy) {
+    let db = new dbFile.Database();
+    await db.connect();
+    let query1 = 'SELECT quantity FROM '+ tableName +' WHERE "' + idName + '" = "' + id +'"'
+    // console.log(query1)
+    let temp = await db.all(query1)
+    // console.log(temp);
+    let new_quantity = temp[0]['quantity'] - quantityToBuy;
+    let query2 = 'UPDATE "' + tableName + '" SET quantity = ? WHERE "' + idName + '" = ?';
+    // console.log(query2)
+    await db.run(query2, [new_quantity, id])
 }
 
-// set of rows read
-exports.all=function(query, params) {
-    return new Promise(function(resolve, reject) {
-        if(params == undefined) params=[]
-
-        this.db.all(query, params, function(err, rows)  {
-            if(err) reject("Read error: " + err.message)
-            else {
-                resolve(rows)
-            }
-        })
-    })
+async function insertOrder(OrderData) {
+    let db = new dbFile.Database();
+    await db.connect();
+    let query = 'INSERT INTO orderInfo(orderId, customerName,customerAddress, cardNumber, exp_date, secu_code, itemName) values(' + OrderData + ')'
+    // console.log(query)
+    await db.run(query)
 }
 
-// each row returned one by one
-exports.each=function(query, params, action) {
-    return new Promise(function(resolve, reject) {
-        var db = this.db
-        db.serialize(function() {
-            db.each(query, params, function(err, row)  {
-                if(err) reject("Read error: " + err.message)
-                else {
-                    if(row) {
-                        action(row)
-                    }
-                }
-            })
-            db.get("", function(err, row)  {
-                resolve(true)
-            })
-        })
-    })
+async function insertVersion(versionNum) {
+    let db = new dbFile.Database();
+    await db.connect();
+    let query = 'INSERT INTO version(versionNum) values(' + versionNum + ')'
+    await db.run(query)
 }
-
-exports.close=function() {
-    return new Promise(function (resolve, reject) {
-        this.db.close()
-        resolve(true)
-    })
-}
+// getAllInfo("tables")
+// getInfoByID("bed", "bedId", "b01")
+// editItemQuantity('bed', 'bedId','b01','1')
+// insertOrder('"ABDC","chao","188 harvest rose","4563888855742057","05/16","826","Table66"')
+// insertVersion(10)
