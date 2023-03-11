@@ -19,7 +19,6 @@ let responseUserOrderStatus = 0;
 
 // listen to Front End Server: port 3010
 // const ioWithFrontEnd = require('socket.io')(3010);
-
 const ioWithFrontEnd = require('socket.io')(3010, {
     cors: {
       origin: '*',
@@ -28,7 +27,7 @@ const ioWithFrontEnd = require('socket.io')(3010, {
 
 
 ioWithFrontEnd.on('connection', function (socketWithFrontEnd) {
-    console.log('connected:', socketWithFrontEnd.client.id);
+    console.log('Load Balancer connected with Front End:', socketWithFrontEnd.client.id);
     startTaskDistributing();
     // data: itemID
     socketWithFrontEnd.on('requestSingleItem', function(data){
@@ -53,6 +52,7 @@ ioWithFrontEnd.on('connection', function (socketWithFrontEnd) {
     socketWithFrontEnd.on('requestAllCateInfo', function(data){
         taskQueue.push("requestAllCateInfo");
         reqestAllCateInfo = data;
+        console.log(data)
         // wait for 2 sec to let server complish task
         let timeOut = setTimeout(function(){
         if(responseAllCateInfo != 0){
@@ -66,6 +66,7 @@ ioWithFrontEnd.on('connection', function (socketWithFrontEnd) {
         }
         }, 2000);
     });
+
 
     //data: user info
     socketWithFrontEnd.on('addOrder', function(data){
@@ -143,12 +144,12 @@ function startTaskDistributing() {
 
 // make connection with Server 1: port 5100
 var ioWithServer1 = require('socket.io-client');
-var socketWithS1 = ioWithServer1.connect("http://localhost:5101/", {
+var socketWithS1 = ioWithServer1.connect("http://localhost:5100/", {
     reconnection: true
 });
 
 socketWithS1.on('connect', function () {
-    console.log('connected to localhost:5100');
+    console.log('Load Balancer connected to localhost:5100 with Server 1');
 
     let timeInterval = setInterval(() => {
         if(serverCurrentTask.server1 != 0 && serverCurrentTask.server1 == "requestSingleItem") {
@@ -195,4 +196,32 @@ socketWithS1.on('connect', function () {
     }, 1000);
 });
 
+// make connection with Server 2: port 5200
+var ioWithServer2 = require('socket.io-client');
+var socketWithS2 = ioWithServer2.connect("http://localhost:5200/", {
+    reconnection: true
+});
 
+socketWithS2.on('connect', function () {
+    console.log('Load Balancer connected to localhost:5200 with Server 2');
+});
+
+// make connection with Server 3: port 5300
+var ioWithServer3 = require('socket.io-client');
+var socketWithS3 = ioWithServer3.connect("http://localhost:5300/", {
+    reconnection: true
+});
+
+socketWithS3.on('connect', function () {
+    console.log('Load Balancer connected to localhost:5300 with Server 3');
+});
+
+// make connection with Server 4: port 5400
+var ioWithServer4 = require('socket.io-client');
+var socketWithS4 = ioWithServer4.connect("http://localhost:5400/", {
+    reconnection: true
+});
+
+socketWithS4.on('connect', function () {
+    console.log('Load Balancer connected to localhost:5400 with Server 4');
+});

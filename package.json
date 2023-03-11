@@ -6,6 +6,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "bluebird": "^3.7.2",
     "bootstrap": "^5.2.3",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
@@ -24,8 +25,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start_back": "node Proxy/loadBalancer.js & node BackEnd/bin/Server1.js",
-    "start_back2": "node Proxy/LB.js & node BackEnd/bin/Server1.js",
+    "start_back": "node Proxy/loadBalancer.js & node BackEnd/Server1.js",
+    "start_back2": "node Proxy/LB.js & node BackEnd/Server1.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

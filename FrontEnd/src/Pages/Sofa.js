@@ -27,11 +27,26 @@ function Chair() {
 
         <Row>
         <Col>
-        <Card style={{color : 'black'}}>
-        <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
+        <Card style={{color : 'black' }}>
+          <Card.Img src = "https://picsum.photos/200/100" />
           <Card.Body>
             <Card.Title>
               Chair 1
+            </Card.Title>
+            <Card.Text>
+              Something
+            </Card.Text>
+            <Button variant='primary' onClick={()=>setGoToChair1(true)}> BUY </Button>
+          </Card.Body>
+        </Card>
+        </Col>
+        
+        <Col>
+        <Card style={{color : 'black'}}>
+          <Card.Img src = "https://picsum.photos/200/100" />
+          <Card.Body>
+            <Card.Title>
+              Card Example
             </Card.Title>
             <Card.Text>
               Something
@@ -43,10 +58,10 @@ function Chair() {
 
         <Col>
         <Card style={{color : 'black'}}>
-        <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
+          <Card.Img src = "https://picsum.photos/200/100" />
           <Card.Body>
             <Card.Title>
-              Chair 2
+              Card Example
             </Card.Title>
             <Card.Text>
               Something
@@ -60,11 +75,26 @@ function Chair() {
 
         <Row>
         <Col>
-        <Card style={{color : 'black'}}>
-        <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
+        <Card style={{color : 'black' }}>
+          <Card.Img src = "https://picsum.photos/200/100" />
           <Card.Body>
             <Card.Title>
-              Chair 3
+              Card Example
+            </Card.Title>
+            <Card.Text>
+              Something
+            </Card.Text>
+            <Button variant='primary' type='submit'> More </Button>
+          </Card.Body>
+        </Card>
+        </Col>
+        
+        <Col>
+        <Card style={{color : 'black'}}>
+          <Card.Img src = "https://picsum.photos/200/100" />
+          <Card.Body>
+            <Card.Title>
+              Card Example
             </Card.Title>
             <Card.Text>
               Something
@@ -76,10 +106,10 @@ function Chair() {
 
         <Col>
         <Card style={{color : 'black'}}>
-        <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
+          <Card.Img src = "https://picsum.photos/200/100" />
           <Card.Body>
             <Card.Title>
-              Chair 4
+              Card Example
             </Card.Title>
             <Card.Text>
               Something
@@ -89,6 +119,14 @@ function Chair() {
         </Card>
         </Col>
         </Row>
+
+        {/* <Breadcrumb>
+          <Breadcrumb.Item>Test</Breadcrumb.Item>
+          <Breadcrumb.Item>Test1</Breadcrumb.Item>
+          <Breadcrumb.Item>Test2</Breadcrumb.Item>
+        </Breadcrumb>
+        <Alert variant = "secondary">This is a button</Alert>
+        <Button>Test Button</Button> */}
         </Container>
       </header>
     </div>

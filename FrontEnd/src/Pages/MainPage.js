@@ -1,33 +1,76 @@
-import React from 'react';
+import React, { useEffect,useState } from 'react';
+import ReactDOM from 'react-dom/client';
+
 import {Container, Row, Col, Button, Alert, Breadcrumb, Card, Form } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import socketConfig from '../socketConfig.js';
+
+
+// let io = require("socket.io-client")
+// let socket = io.connect("http://localhost:3010/",{
+//   reconnection: true 
+// })
+
+// socket.on('connect', function (socketWithLoadBalancer) {
+//   console.log('connected to localhost:3010')
+//   socket.emit("requestAllCateInfo","chair")
+// });
+
+
+
 
 function MainPage() {
+  
+  const [socket, setSocket] = useState(socketConfig,{
+    reconnection: true 
+  });
 
+  const navigate = useNavigate(); // react-router-dom v6
   const [goToChair, setGoToChair] = React.useState(false)
   const [goToTable, setGoToTable] = React.useState(false)
   const [goToSofa, setGoToSofa] = React.useState(false)
   const [goToBed, setGoToBed] = React.useState(false)
 
   
-  if(goToChair){
-    return <Navigate to= "/Chair"/>;
-  }
+  useEffect(() => {
+    function nav() {
+      if(goToChair){
+        console.log('giveMeChairs')
+        socket.emit("requestAllCateInfo","aquireChairs")
+        navigate('/chair')
+      }
+    }
+    nav()
+  }, [goToChair,navigate])
 
-  if(goToTable){
-    return <Navigate to= "/Table"/>;
-  }
+  useEffect(()=>{
+    function nav(){
+      if(goToBed){
+        navigate('/bed')
+      }
+    }
+    nav()
+  },[goToBed,navigate])
 
-  if(goToSofa){
-    return <Navigate to= "/Sofa"/>;
-  }
+  useEffect(()=>{
+    function nav(){
+      if(goToTable){
+        navigate('/table')
+      }
+    }
+    nav()
+  },[goToTable,navigate])
 
-  if(goToBed){
-    return <Navigate to= "/Bed"/>;
-  }
 
-
+  useEffect(()=>{
+    function nav(){
+      if(goToSofa){
+        navigate('/sofa')
+      }
+    }
+    nav()
+  },[goToSofa,navigate])
 
   return (
     <div className="App">
@@ -86,7 +129,7 @@ function MainPage() {
             <Card.Text>
               Something
             </Card.Text>
-            <Button variant='primary' type='submit'> Bed </Button>
+            <Button variant='primary' onClick={()=>setGoToBed(true)}> Bed </Button>
           </Card.Body>
         </Card>
         </Col>
@@ -101,7 +144,7 @@ function MainPage() {
             <Card.Text>
               Something
             </Card.Text>
-            <Button variant='primary'> More </Button>
+            <Button variant='primary' onClick={()=>setGoToSofa(true)}> Sofa </Button>
           </Card.Body>
         </Card>
         </Col>
