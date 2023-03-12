@@ -1,6 +1,6 @@
 const DB = require('./asyDB')
 
-let totalServer=5;
+let totalServer=3;
 
 let minServerRequire=parseInt((totalServer/2));
 // console.log(minServerRequire)
@@ -8,29 +8,29 @@ let minServerRequire=parseInt((totalServer/2));
 
 // load balancer part:
 // port 5000: connect with load balancer
-const ioWithLoadBalancer = require('socket.io')(5000);
+const ioWithLoadBalancer = require('socket.io')(6001);
 ioWithLoadBalancer.on('connection', function (socket) {
     console.log('Server 0: connected with Load Balancer:', socket.client.id);
 
     socket.on('requestSingleItem', async function (data) {
         let input = JSON.parse(data)
-        console.log('Server1: Send in Query')
+        console.log('Server0: Send in Query')
         let result = await DB.getInfoByID(input.tableName, input.idName, input.id)
         socket.emit('responseSingleItemInfo', result)
-        console.log("Server1: Send back", result)
+        console.log("Server0: Send back", result)
     });
 
     socket.on('requestAllCateInfo', async function (data) {
         let input = JSON.parse(data)
-        console.log('Server1: Send in Query')
+        console.log('Server0: Send in Query')
         let result = await DB.getAllInfo(input.tableName)
         socket.emit('responseAllCateInfo', result)
-        console.log("Server1: Send back", result)
+        console.log("Server0: Send back", result)
     });
 
     socket.on('addOrder', async function (data) {
         let input = JSON.parse(data)
-        console.log('Server1: Send in Query')
+        console.log('Server0: Send in Query')
         let result
         try {
             await DB.editItemQuantity(input.tableName, input.idName, input.id, input.quantityToBuy)
@@ -43,14 +43,13 @@ ioWithLoadBalancer.on('connection', function (socket) {
         result = JSON.stringify({status: 1, content: "Order successfully placed"})
         socket.emit('responseUserOrderStatus', result)
 
-        console.log("Server1: Send back", result)
+        console.log("Server0: Send back", result)
     });
 
 });
 
 
 
-// 
 // Multiple server communication:
 //parameters for election
 let needElection=false;
@@ -72,6 +71,139 @@ let doneDeclareMasterWithTarget=[false,false,false,false,false];
 const ioWithServer1 = require('socket.io')(5010);
 ioWithServer1.on('connection', async function (socket) {
     let aimId=1;
+    totalAlive++;
+    // if i am master
+    //send sql file to this Server
+    if(isMaster){
+        sendLocalSql(socket);
+    }
+    //recv SQL file
+    socket.on('sendSQL', function (data, filename) {
+        renewDB(data, filename);
+    })
+
+    //First connect to server send initial request & listen initial response
+    socket.emit('requestMaster'); 
+    socket.on('responseMaster', function(data){
+        askMaster(data,aimId);
+    });
+
+    //Listen for request master 
+    socket.on('requestMaster', function(){
+        socket.emit('responseMaster',master);
+    });
+
+    socket.on('requestElection', function (data){
+        responseElection(socket,data);
+    });
+
+    socket.on('delclareMaster', function (data){
+        recieveDelcareMaster(socket, data)
+
+    });
+
+    socket.on('disconnect', function(){
+        disconnect(socket, aimId);
+    });
+    // keep check if need to do master election 
+    setInterval(startElection(socket,aimId),1000/2);
+    // keep check if need to do master declare
+    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+});
+
+
+//port 5020 connects with server 2
+const ioWithServer2 = require('socket.io')(5020);
+ioWithServer2.on('connection', async function (socket) {
+    let aimId=2;
+    totalAlive++;
+    // if i am master
+    //send sql file to this Server
+    if(isMaster){
+        sendLocalSql(socket);
+    }
+    //recv SQL file
+    socket.on('sendSQL', function (data, filename) {
+        renewDB(data, filename);
+    })
+
+    //First connect to server send initial request & listen initial response
+    socket.emit('requestMaster'); 
+    socket.on('responseMaster', function(data){
+        askMaster(data,aimId);
+    });
+
+    //Listen for request master 
+    socket.on('requestMaster', function(){
+        socket.emit('responseMaster',master);
+    });
+
+    socket.on('requestElection', function (data){
+        responseElection(socket,data);
+    });
+
+    socket.on('delclareMaster', function (data){
+        recieveDelcareMaster(socket, data)
+
+    });
+
+    socket.on('disconnect', function(){
+        disconnect(socket, aimId);
+    });
+    // keep check if need to do master election 
+    setInterval(startElection(socket,aimId),1000/2);
+    // keep check if need to do master declare
+    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+});
+
+//port 5030 connects with server 3
+const ioWithServer3 = require('socket.io')(5030);
+ioWithServer3.on('connection', async function (socket) {
+    let aimId=3;
+    totalAlive++;
+    // if i am master
+    //send sql file to this Server
+    if(isMaster){
+        sendLocalSql(socket);
+    }
+    //recv SQL file
+    socket.on('sendSQL', function (data, filename) {
+        renewDB(data, filename);
+    })
+
+    //First connect to server send initial request & listen initial response
+    socket.emit('requestMaster'); 
+    socket.on('responseMaster', function(data){
+        askMaster(data,aimId);
+    });
+
+    //Listen for request master 
+    socket.on('requestMaster', function(){
+        socket.emit('responseMaster',master);
+    });
+
+    socket.on('requestElection', function (data){
+        responseElection(socket,data);
+    });
+
+    socket.on('delclareMaster', function (data){
+        recieveDelcareMaster(socket, data)
+
+    });
+
+    socket.on('disconnect', function(){
+        disconnect(socket, aimId);
+    });
+    // keep check if need to do master election 
+    setInterval(startElection(socket,aimId),1000/2);
+    // keep check if need to do master declare
+    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+});
+
+//port 5040 connects with server 4
+const ioWithServer4 = require('socket.io')(5040);
+ioWithServer4.on('connection', async function (socket) {
+    let aimId=4;
     totalAlive++;
     // if i am master
     //send sql file to this Server
@@ -216,19 +348,3 @@ function disconnect(socket, aimId){
 function sendLocalSql(socket){
 
 }
-
-
-//port 5020 connects with server 2
-const ioWithServer2 = require('socket.io')(5020);
-ioWithServer2.on('connection', async function (socket) {
-});
-
-//port 5030 connects with server 3
-const ioWithServer3 = require('socket.io')(5030);
-ioWithServer3.on('connection', async function (socket) {
-});
-
-//port 5040 connects with server 4
-const ioWithServer4 = require('socket.io')(5040);
-ioWithServer4.on('connection', async function (socket) {
-});

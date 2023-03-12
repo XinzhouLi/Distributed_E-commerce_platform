@@ -3,32 +3,34 @@ const DB = require('./asyDB')
 let totalServer=3;
 
 let minServerRequire=parseInt((totalServer/2));
+// console.log(minServerRequire)
+
 
 // load balancer part:
-// port 5100: connect with load balancer
-const ioWithLoadBalancer = require('socket.io')(5100);
+// port 5000: connect with load balancer
+const ioWithLoadBalancer = require('socket.io')(5000);
 ioWithLoadBalancer.on('connection', function (socket) {
-    console.log('Server 1: connected with Load Balancer:', socket.client.id);
+    console.log('Server 0: connected with Load Balancer:', socket.client.id);
 
     socket.on('requestSingleItem', async function (data) {
         let input = JSON.parse(data)
-        console.log('Server1: Send in Query')
+        console.log('Server0: Send in Query')
         let result = await DB.getInfoByID(input.tableName, input.idName, input.id)
         socket.emit('responseSingleItemInfo', result)
-        console.log("Server1: Send back", result)
+        console.log("Server0: Send back", result)
     });
 
     socket.on('requestAllCateInfo', async function (data) {
         let input = JSON.parse(data)
-        console.log('Server1: Send in Query')
+        console.log('Server0: Send in Query')
         let result = await DB.getAllInfo(input.tableName)
         socket.emit('responseAllCateInfo', result)
-        console.log("Server1: Send back", result)
+        console.log("Server0: Send back", result)
     });
 
     socket.on('addOrder', async function (data) {
         let input = JSON.parse(data)
-        console.log('Server1: Send in Query')
+        console.log('Server0: Send in Query')
         let result
         try {
             await DB.editItemQuantity(input.tableName, input.idName, input.id, input.quantityToBuy)
@@ -41,9 +43,11 @@ ioWithLoadBalancer.on('connection', function (socket) {
         result = JSON.stringify({status: 1, content: "Order successfully placed"})
         socket.emit('responseUserOrderStatus', result)
 
-        console.log("Server1: Send back", result)
+        console.log("Server0: Send back", result)
     });
+
 });
+
 
 
 // Multiple server communication:
@@ -53,7 +57,7 @@ let electionReponseNum=0;
 let quitElection=false;
 let declareMaster=false;
 let totalAlive=0;
-let id =1;
+let id =0;
 let dbVersion=1;
 let isMaster = false;
 let master = -1;
@@ -61,14 +65,12 @@ let master = -1;
 let doneRequestWithTarget=[false,false,false,false,false];
 let doneDeclareMasterWithTarget=[false,false,false,false,false];
 
-// make connection with Server 0: port 5010
-var ioWithServer0 = require('socket.io-client');
-var socketWithS0 = ioWithServer0.connect("http://localhost:5010/", {
-    reconnection: true
-});
 
-socketWithS0.on('connection', async function(){
-    let aimId=0;
+
+//port 5010 connects with server 1
+const ioWithServer1 = require('socket.io')(5010);
+ioWithServer1.on('connection', async function (socket) {
+    let aimId=1;
     totalAlive++;
     // if i am master
     //send sql file to this Server
@@ -107,11 +109,11 @@ socketWithS0.on('connection', async function(){
     setInterval(startElection(socket,aimId),1000/2);
     // keep check if need to do master declare
     setInterval(sendDeclareMaster(socket,aimId),1000/50);
-
 });
 
-//port 5120 connects with server 2
-const ioWithServer2 = require('socket.io')(5120);
+
+//port 5020 connects with server 2
+const ioWithServer2 = require('socket.io')(5020);
 ioWithServer2.on('connection', async function (socket) {
     let aimId=2;
     totalAlive++;
@@ -154,8 +156,8 @@ ioWithServer2.on('connection', async function (socket) {
     setInterval(sendDeclareMaster(socket,aimId),1000/50);
 });
 
-//port 5130 connects with server 3
-const ioWithServer3 = require('socket.io')(5130);
+//port 5030 connects with server 3
+const ioWithServer3 = require('socket.io')(5030);
 ioWithServer3.on('connection', async function (socket) {
     let aimId=3;
     totalAlive++;
@@ -198,8 +200,8 @@ ioWithServer3.on('connection', async function (socket) {
     setInterval(sendDeclareMaster(socket,aimId),1000/50);
 });
 
-//port 5130 connects with server 4
-const ioWithServer4 = require('socket.io')(5140);
+//port 5040 connects with server 4
+const ioWithServer4 = require('socket.io')(5040);
 ioWithServer4.on('connection', async function (socket) {
     let aimId=4;
     totalAlive++;
@@ -241,9 +243,6 @@ ioWithServer4.on('connection', async function (socket) {
     // keep check if need to do master declare
     setInterval(sendDeclareMaster(socket,aimId),1000/50);
 });
-
-
-
 
 function askMaster(data, aimId){
     if(data == -1 && master == -1){
