@@ -18,12 +18,32 @@ socketWithS1.on('connect', function () {
     var thisServer = totalNumServer;
     serverList.push(socketWithS1);
     console.log('Load Balancer connected to localhost:5101 with Server 1, totalNumServer: ' + totalNumServer);
-    
-    socketWithS1.once("disconnect", (reason) => {
+    socketWithS1.on("disconnect", (reason) => {
         console.log("5101 disconnected because of " + reason);
         totalNumServer--;
         serverList.splice(thisServer-1, 1);
         
+        console.log("totalNumServer after deleted: " + totalNumServer);
+        console.log("Server "+(thisServer-1)+" was deleted");
+    })
+});
+
+//init server socket
+let ioWithServerA = require('socket.io-client');
+let socketWithSA = ioWithServerA.connect("http://localhost:5100/", {
+    reconnection: true
+});
+socketWithSA.on('connect', function () {
+    console.log(totalNumServer);
+    totalNumServer++;
+    var thisServer = totalNumServer;
+    serverList.push(socketWithSA);
+    console.log('Load Balancer connected to localhost:5100 with Server A, totalNumServer: ' + totalNumServer);
+    
+    socketWithSA.on("disconnect", (reason) => {
+        console.log("5100 disconnected because of " + reason);
+        totalNumServer--;
+        serverList.splice(thisServer-1, 1);
         console.log("totalNumServer after deleted: " + totalNumServer);
         console.log("Server "+(thisServer-1)+" was deleted");
     })
@@ -38,8 +58,17 @@ var socketWithST = ioWithServerTest.connect("http://localhost:6000/", {
 socketWithST.on('connect', function () {
     console.log(totalNumServer);
     totalNumServer++;
+    var thisServer = totalNumServer;
     serverList.push(socketWithST);
     console.log('Load Balancer connected to localhost:6000 with Test Server, totalNumServer: ' + totalNumServer);
+
+    socketWithST.on("disconnect", (reason) => {
+        console.log("6000 disconnected because of " + reason);
+        totalNumServer--;
+        serverList.splice(thisServer-1, 1);
+        console.log("totalNumServer after deleted: " + totalNumServer);
+        console.log("Server "+(thisServer-1)+" was deleted");
+    })
 });
 
 
@@ -76,6 +105,8 @@ socketWithS4.on('connect', function () {
 
 
 
+
+
 // Connect with frontend
 ioWithFrontEnd.on("connection", function (socketWithFront) {
     console.log('LB: front end connected:', socketWithFront.client.id);
@@ -88,11 +119,11 @@ ioWithFrontEnd.on("connection", function (socketWithFront) {
         serverList[currentServer-1].once("responseAllCateInfo", function (response) {
             console.log("Get response from server: " + currentServer);
             console.log('LB: Server send back: ' + response + '\n   to ' + socketWithFront.id);
-            setInterval(function () {
+            //setInterval(function () {
                 //Send the request back to front end
                 socketWithFront.emit("responseAllCateInfo", response);
                 if (response != null) {
-                    clearInterval();
+                    //clearInterval();
                     currentServer++;
                     console.log("if response is not null: " + currentServer);
                     if(currentServer > totalNumServer){
@@ -103,7 +134,7 @@ ioWithFrontEnd.on("connection", function (socketWithFront) {
                 else {
                     console.log("response is null");
                 }
-            }, 5000);
+            //}, 5000);
             console.log("totalNumServer: " + totalNumServer);
             console.log("currentServer: " + currentServer);
         })
