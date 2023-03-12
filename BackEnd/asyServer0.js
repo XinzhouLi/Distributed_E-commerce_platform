@@ -161,9 +161,9 @@ function startElection(socket,aimId){
 
 function sendDeclareMaster(socket,aimId){
     if(declareMaster&& !doneDeclareMasterWithTarget[aimId]){
+        doneDeclareMasterWithTarget[aimId]=true;
         socket.emit('declareMaster',id);
         socket.off('responseElection');
-        doneDeclareMasterWithTarget[aimId]=true;
         isMaster=true;
         sendLocalSql(socket);
     }
@@ -173,7 +173,10 @@ function responseElection(socket,data){
     console.log("I recieve election request from: "+data)
         let targetId=data.id;
         let targetDBVersion=data.dbVersion;
-        if(dbVersion>=targetDBVersion){
+        if(dbVersion>targetDBVersion) {
+            // 0 is quit: ask target quit
+            socket.emit('responseElection', 0);
+        }else if(dbVersion==targetDBVersion){
             if(id>targetId){
                 // 0 is quit: ask target quit
                 socket.emit('responseElection',0);
