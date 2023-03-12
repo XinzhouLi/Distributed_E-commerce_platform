@@ -1,5 +1,8 @@
 const Promise = require("bluebird");
 const sqlite3 = require('sqlite3');
+
+
+
 class Database {
     async connect() {
         return new Promise((resolve, reject) => {
@@ -47,6 +50,20 @@ class Database {
             })
         });
     }
+
+    async close() {
+        return new Promise((resolve, reject) => {
+            this.db.close((e) => {
+                if (e) {
+                    reject(e);
+                } else {
+                    resolve();
+                }
+            })
+        });
+    }
+
+
 }
 
 exports.Database = Database

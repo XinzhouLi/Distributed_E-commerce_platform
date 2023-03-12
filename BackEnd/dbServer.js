@@ -3,7 +3,10 @@ var express = require("express");
 
 var app = express();
 app.use(express.json());
-var dbPath = '../db/master.db'
+var dbPath = 'db/master.db'
+var dbPath1 = 'db/slave1.db'
+
+const tables = ["bed","chair","orderInfo","sofa","tables","version"];
 
 
 
@@ -13,7 +16,7 @@ var exec = require('child_process').exec;
 //let flag = true;
 function CopyDB(){
     //if (flag){
-    exec('sqlite3 ../db/master.db .dump > ../db/master.sql',
+    exec('sqlite3 db/master.db .dump > db/master.sql',
         function (error, stdout, stderr) {
         if (error !== null) {
              console.log('exec error: ' + error);
@@ -23,36 +26,32 @@ function CopyDB(){
         //flag = false;
     //}
     //else{
-    fs.stat('../db/slave1.db', function (err, stats) {
-        //console.log(stats);//here we got all information of file in stats variable
-        fs.unlink('./db/slave1.db',function(err){
-        if(err) {
-            exec('sqlite3 ../db/slave1.db < ../db/master.sql',
-            function (error, stdout, stderr) {
-                if (error !== null) {
-                    console.log('exec error: ' + error);
-                }
-            });
-            console.log('slave1 sql updated');
-            //return console.log(err);
-        }
-        else{s
-            exec('sqlite3 ../db/slave1.db < ../db/master.sql',
-            function (error, stdout, stderr) {
-                if (error !== null) {
-                    console.log('exec error: ' + error);
-                }
-            });
-            console.log('slave1 sql updated');
-        }
+    fs.stat('db/slave1.db', function (err, stats) {
+        //console.log(err);//here we got all information of file in stats variable
+        var db = new sqlite3.Database(dbPath1, function (err, data) {
+            console.log('exec error: ' + err);
+                db.run('DROP TABLE IF EXISTS bed',function(err){
+                    db.run('DROP TABLE IF EXISTS chair' ,function(err){
+                        db.run('DROP TABLE IF EXISTS orderInfo' ,function(err){
+                            db.run('DROP TABLE IF EXISTS sofa',function(err){
+                                db.run('DROP TABLE IF EXISTS tables',function(err){
+                                    db.run('DROP TABLE IF EXISTS version',function(err){
+                        db.close();
+                        exec('sqlite3 db/slave1.db < db/master.sql',function (error, stdout, stderr) {
+                            console.log('slave1 sql updated');
+                            if (error !== null) {
+                                console.log('exec error: ' + error);
+                            }
+                        });
+                })})})})})})
         });  
     });
 
-    fs.stat('../db/slave2.db', function (err, stats) {
+    fs.stat('db/slave2.db', function (err, stats) {
         //console.log(stats);//here we got all information of file in stats variable
-        fs.unlink('../db/slave2.db',function(err){
+        fs.unlink('db/slave2.db',function(err){
         if(err) {
-            exec('sqlite3 ../db/slave2.db < ../db/master.sql',
+            exec('sqlite3 db/slave2.db < db/master.sql',
             function (error, stdout, stderr) {
                 if (error !== null) {
                     console.log('exec error: ' + error);
@@ -62,7 +61,7 @@ function CopyDB(){
             //return console.log(err);
         }
         else{
-            exec('sqlite3 ../db/slave2.db < ../db/master.sql',
+            exec('sqlite3 db/slave2.db < db/master.sql',
             function (error, stdout, stderr) {
                 if (error !== null) {
                     console.log('exec error: ' + error);
@@ -75,11 +74,11 @@ function CopyDB(){
         });  
     });
 
-    fs.stat('../db/slave3.db', function (err, stats) {
+    fs.stat('db/slave3.db', function (err, stats) {
         //console.log(stats);//here we got all information of file in stats variable
-        fs.unlink('../db/slave3.db',function(err){
+        fs.unlink('db/slave3.db',function(err){
         if(err) {
-            exec('sqlite3 ../db/slave3.db < ../db/master.sql',
+            exec('sqlite3 db/slave3.db < db/master.sql',
             function (error, stdout, stderr) {
                 if (error !== null) {
                     console.log('exec error: ' + error);
@@ -89,7 +88,7 @@ function CopyDB(){
             //return console.log(err);
         }
         else{
-            exec('sqlite3 ../db/slave3.db < ../db/master.sql',
+            exec('sqlite3 db/slave3.db < db/master.sql',
             function (error, stdout, stderr) {
                 if (error !== null) {
                     console.log('exec error: ' + error);
@@ -101,11 +100,11 @@ function CopyDB(){
         });  
     });
 
-    fs.stat('../db/slave4.db', function (err, stats) {
+    fs.stat('db/slave4.db', function (err, stats) {
         //console.log(stats);//here we got all information of file in stats variable
-        fs.unlink('./db/slave4.db',function(err){
+        fs.unlink('db/slave4.db',function(err){
         if(err) {
-            exec('sqlite3 ../db/slave4.db < ../db/master.sql',
+            exec('sqlite3 db/slave4.db < db/master.sql',
             function (error, stdout, stderr) {
                 if (error !== null) {
                     console.log('exec error: ' + error);
@@ -115,7 +114,7 @@ function CopyDB(){
             //return console.log(err);
         }
         else{
-            exec('sqlite3 ../db/slave4.db < ../db/master.sql',
+            exec('sqlite3 db/slave4.db < db/master.sql',
             function (error, stdout, stderr) {
                 if (error !== null) {
                     console.log('exec error: ' + error);
@@ -131,7 +130,7 @@ function CopyDB(){
 });
 }
 
-setInterval(CopyDB, 10000);
+setInterval(CopyDB, 6000);
 
 
 
