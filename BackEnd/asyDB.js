@@ -75,7 +75,7 @@ async function dumpLocalSQL(serverName){
     await exec('sqlite3 ../db/' + serverName + ' .dump > ../db/master.sql');
 }
 
-async function ApplyMasterSQL(){
+async function applyMasterSQL(){
     let db = new dbFile.Database();
     await db.connect();
     // later for increase the speed of process to make it to Promiss.all 
@@ -100,3 +100,5 @@ exports.getAllInfo = getAllInfo;
 exports.getInfoByID = getInfoByID;
 exports.editItemQuantity = editItemQuantity;
 exports.insertOrder = insertOrder;
+exports.applyMasterSQL = applyMasterSQL;
+exports.dumpLocalSQL = dumpLocalSQL;
