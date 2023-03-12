@@ -7,8 +7,8 @@ let minServerRequire=parseInt((totalServer/2));
 
 
 // load balancer part:
-// port 5100: connect with load balancer
-const ioWithLoadBalancer = require('socket.io')(5100);
+// port 5000: connect with load balancer
+const ioWithLoadBalancer = require('socket.io')(5000);
 ioWithLoadBalancer.on('connection', function (socket) {
     console.log('Server 0: connected with Load Balancer:', socket.client.id);
 
@@ -68,8 +68,8 @@ let doneDeclareMasterWithTarget=[false,false,false,false,false];
 
 
 
-//port 5120 connects with server 1
-const ioWithServer1 = require('socket.io')(5120);
+//port 5010 connects with server 1
+const ioWithServer1 = require('socket.io')(5010);
 ioWithServer1.on('connection', async function (socket) {
     let aimId=1;
     totalAlive++;
@@ -218,3 +218,17 @@ function sendLocalSql(socket){
 }
 
 
+//port 5020 connects with server 2
+const ioWithServer2 = require('socket.io')(5020);
+ioWithServer2.on('connection', async function (socket) {
+});
+
+//port 5030 connects with server 3
+const ioWithServer3 = require('socket.io')(5030);
+ioWithServer3.on('connection', async function (socket) {
+});
+
+//port 5040 connects with server 4
+const ioWithServer4 = require('socket.io')(5040);
+ioWithServer4.on('connection', async function (socket) {
+});
