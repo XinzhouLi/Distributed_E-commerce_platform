@@ -8,7 +8,7 @@ let minServerRequire=parseInt((totalServer/2));
 
 // load balancer part:
 // port 5000: connect with load balancer
-const ioWithLoadBalancer = require('socket.io')(5000);
+const ioWithLoadBalancer = require('socket.io')(5111);
 ioWithLoadBalancer.on('connection', function (socket) {
     console.log('Server 0: connected with Load Balancer:', socket.client.id);
 
@@ -59,7 +59,7 @@ let declareMaster=false;
 let totalAlive=0;
 let id =0;
 let dbVersion=1;
-let isMaster = false;
+let isMaster = true;
 let master = -1;
 //initialize data
 let doneRequestWithTarget=[false,false,false,false,false];
@@ -70,6 +70,7 @@ let doneDeclareMasterWithTarget=[false,false,false,false,false];
 //port 5010 connects with server 1
 const ioWithServer1 = require('socket.io')(5010);
 ioWithServer1.on('connection', async function (socket) {
+    console.log("0 connect to 1");
     let aimId=1;
     totalAlive++;
     // if i am master
@@ -106,15 +107,16 @@ ioWithServer1.on('connection', async function (socket) {
         disconnect(socket, aimId);
     });
     // keep check if need to do master election 
-    setInterval(startElection(socket,aimId),1000/2);
+    setInterval(startElection, socket,aimId,1000/2);
     // keep check if need to do master declare
-    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+    setInterval(sendDeclareMaster,socket,aimId,1000/50);
 });
 
 
 //port 5020 connects with server 2
 const ioWithServer2 = require('socket.io')(5020);
 ioWithServer2.on('connection', async function (socket) {
+    console.log("0 connect to 2");
     let aimId=2;
     totalAlive++;
     // if i am master
@@ -151,14 +153,15 @@ ioWithServer2.on('connection', async function (socket) {
         disconnect(socket, aimId);
     });
     // keep check if need to do master election 
-    setInterval(startElection(socket,aimId),1000/2);
+    setInterval(startElection, socket,aimId,1000/2);
     // keep check if need to do master declare
-    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+    setInterval(sendDeclareMaster,socket,aimId,1000/50);
 });
 
 //port 5030 connects with server 3
 const ioWithServer3 = require('socket.io')(5030);
 ioWithServer3.on('connection', async function (socket) {
+    console.log("0 connect to 3");
     let aimId=3;
     totalAlive++;
     // if i am master
@@ -294,6 +297,7 @@ function startElection(socket,aimId){
 function sendDeclareMaster(socket,aimId){
     if(declareMaster&& !doneDeclareMasterWithTarget[aimId]){
         doneDeclareMasterWithTarget[aimId]=true;
+        console.log("I am master 0")
         socket.emit('declareMaster',id);
         socket.off('responseElection');
         isMaster=true;

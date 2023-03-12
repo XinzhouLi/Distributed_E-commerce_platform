@@ -149,9 +149,9 @@ ioWithServer2.on('connection', async function (socket) {
         disconnect(socket, aimId);
     });
     // keep check if need to do master election 
-    setInterval(startElection(socket,aimId),1000/2);
+    setInterval(startElection, socket,aimId,1000/2);
     // keep check if need to do master declare
-    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+    setInterval(sendDeclareMaster,socket,aimId,1000/50);
 });
 
 //port 5130 connects with server 3
@@ -290,6 +290,7 @@ function startElection(socket,aimId){
            }
         });
     }
+    return 1;
 }
 
 function sendDeclareMaster(socket,aimId){
