@@ -239,126 +239,34 @@ function editItemQuantity(tableName, IdName, Id, changeNum) {
 
 
 // Replication
-
+function dumpLocalSQL(){
+    exec('sqlite3 ../db/server1.db .dump > ../db/master.sql',
+        function (error, stdout, stderr) {   
+            console.log('master sql created');
+        });
+}
 //let flag = true;
 function CopyDB(){
-    //if (flag){
-    exec('sqlite3 ../db/master.db .dump > ../db/master.sql',
-        function (error, stdout, stderr) {
-        // if (error !== null) {
-        //      console.log('exec error: ' + error);
-        // }
-        
-    console.log('master sql created');
-        //flag = false;
-    //}
-    //else{
-    fs.stat('../db/slave1.db', function (err, stats) {
-        //console.log(stats);//here we got all information of file in stats variable
-        fs.unlink('./db/slave1.db',function(err){
-        if(err) {
-            exec('sqlite3 ../db/slave1.db < ../db/master.sql',
-            function (error, stdout, stderr) {
-                // if (error !== null) {
-                //     console.log('exec error: ' + error);
-                // }
-            });
-            console.log('slave1 sql updated');
-            //return console.log(err);
-        }
-        else{
-            exec('sqlite3 ../db/slave1.db < ../db/master.sql',
-            function (error, stdout, stderr) {
-                // if (error !== null) {
-                //     console.log('exec error: ' + error);
-                // }
-            });
-            console.log('slave1 sql updated');
-        }
+    fs.stat('db/server1.db', function (err, stats) {
+        //console.log(err);//here we got all information of file in stats variable
+        var db = new sqlite3.Database(dbPath1, function (err, data) {
+            console.log('exec error: ' + err);
+                db.run('DROP TABLE IF EXISTS bed',function(err){
+                    db.run('DROP TABLE IF EXISTS chair' ,function(err){
+                        db.run('DROP TABLE IF EXISTS orderInfo' ,function(err){
+                            db.run('DROP TABLE IF EXISTS sofa',function(err){
+                                db.run('DROP TABLE IF EXISTS tables',function(err){
+                                    db.run('DROP TABLE IF EXISTS version',function(err){
+                        db.close();
+                        exec('sqlite3 db/server1.db < db/master.sql',function (error, stdout, stderr) {
+                            console.log('server1 sql updated');
+                            if (error !== null) {
+                                console.log('exec error: ' + error);
+                            }
+                        });
+                })})})})})})
         });  
     });
-
-    fs.stat('../db/slave2.db', function (err, stats) {
-        //console.log(stats);//here we got all information of file in stats variable
-        fs.unlink('../db/slave2.db',function(err){
-        if(err) {
-            exec('sqlite3 ../db/slave2.db < ../db/master.sql',
-            function (error, stdout, stderr) {
-                // if (error !== null) {
-                //     console.log('exec error: ' + error);
-                // }
-            });
-            console.log('slave2 sql updated');
-            //return console.log(err);
-        }
-        else{
-            exec('sqlite3 ../db/slave2.db < ../db/master.sql',
-            function (error, stdout, stderr) {
-                // if (error !== null) {
-                //     console.log('exec error: ' + error);
-                // }
-            });
-        
-            console.log('slave2 sql updated');
-            //return console.log(err);
-        }
-        });  
-    });
-
-    fs.stat('../db/slave3.db', function (err, stats) {
-        //console.log(stats);//here we got all information of file in stats variable
-        fs.unlink('../db/slave3.db',function(err){
-        if(err) {
-            exec('sqlite3 ../db/slave3.db < ../db/master.sql',
-            function (error, stdout, stderr) {
-                // if (error !== null) {
-                //     console.log('exec error: ' + error);
-                // }
-            });
-            console.log('slave3 sql updated');
-            //return console.log(err);
-        }
-        else{
-            exec('sqlite3 ../db/slave3.db < ../db/master.sql',
-            function (error, stdout, stderr) {
-                // if (error !== null) {
-                //     console.log('exec error: ' + error);
-                // }
-            });
-            console.log('slave3 sql updated');
-            //return console.log(err);
-        }
-        });  
-    });
-
-    fs.stat('../db/slave4.db', function (err, stats) {
-        //console.log(stats);//here we got all information of file in stats variable
-        fs.unlink('./db/slave4.db',function(err){
-        if(err) {
-            exec('sqlite3 ../db/slave4.db < ../db/master.sql',
-            function (error, stdout, stderr) {
-                // if (error !== null) {
-                //     console.log('exec error: ' + error);
-                // }
-            });
-            console.log('slave4 sql updated');
-            //return console.log(err);
-        }
-        else{
-            exec('sqlite3 ../db/slave4.db < ../db/master.sql',
-            function (error, stdout, stderr) {
-                // if (error !== null) {
-                //     console.log('exec error: ' + error);
-                // }
-            });
-            console.log('slave4 sql updated');
-            //return console.log(err);
-        }
-        });  
-    });
-    //flag = true;
-//}
-});
 }
 
 //setInterval(CopyDB, 10000);
@@ -373,6 +281,38 @@ ioWithServer2.on('connection', async function (socket) {
     let doneRequestWithServer2=false;
     let doneDeclareMasterWithServer2=false;
     totalAlive++;
+
+    //send SQL file
+    // socket.emit("upload", files[0], (status) => {
+    //       console.log(status);
+    // });
+    fs.open('/db/master.sql', 'r', function (err, fd) {
+        if (err) {
+                socket.emit('sendSQL', 'fail')
+        } else {
+            fs.stat('/db/master.sql', function (err, stats) {
+                    if (err) {
+                        console.log(err)
+                        socket.emit('sendSQL', 'fail')
+                    } else{
+                    //console.log(stats.size)
+                    let buffer = new Buffer.alloc(stats.size);
+                    fs.read(fd, buffer, 0, buffer.length, 0, function (err, bytes) {
+                        console.log(fd)
+                        socket.emit('sendSQL', buffer, "master.sql");
+                        })
+                    }
+                })
+
+            }
+    })
+
+    //recv SQL file
+    socket.on('sendSQL', function (data, filename) {
+        console.log(data)
+        fs.writeFileSync('/db/' + filename, data)
+    })
+
 
     // first leader election
     socket.emit('requestMaster'); 

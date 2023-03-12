@@ -1,5 +1,8 @@
 const dbFile = require("./dbDAO")
-
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
+// Check out
+// https://stackoverflow.com/questions/30763496/how-to-promisify-nodes-child-process-exec-and-child-process-execfile-functions
 
 async function getAllInfo(tableName){
     let db = new dbFile.Database();
@@ -45,6 +48,25 @@ async function insertVersion(versionNum) {
     await db.connect();
     let query = 'INSERT INTO version(versionNum) values(' + versionNum + ')'
     await db.run(query)
+}
+
+async function dumpLocalSQL(serverName){
+    //For example, serverName = server1.db extension name necessary
+    await exec('sqlite3 ../db/' + serverName + ' .dump > ../db/master.sql');
+}
+
+async function ApplyMasterSQL(){
+    let db = new dbFile.Database();
+    await db.connect();
+    // later for increase the speed of process to make it to Promiss.all 
+    await db.run('DROP TABLE IF EXISTS bed');
+    await db.run('DROP TABLE IF EXISTS chair');
+    await db.run('DROP TABLE IF EXISTS orderInfo');
+    await db.run('DROP TABLE IF EXISTS sofa');
+    await db.run('DROP TABLE IF EXISTS tables');
+    await db.run('DROP TABLE IF EXISTS version');
+    await db.close();
+    await exec('sqlite3 db/server1.db < db/master.sql');
 }
 // getAllInfo("tables")
 // getInfoByID("bed", "bedId", "b01")
