@@ -63,6 +63,7 @@ let master = -1;
 //initialize data
 let doneRequestWithTarget=[false,false,false,false,false];
 let doneDeclareMasterWithTarget=[false,false,false,false,false];
+let numNoMaster =0;
 
 // make connection with Server 0: port 5020
 var ioWithServer0 = require('socket.io-client');
@@ -76,40 +77,40 @@ socketWithS0.on('connection', async function() {
     // if i am master
     //send sql file to this Server
     if(isMaster){
-        sendLocalSql(socket);
+        sendLocalSql(socketWithS0);
     }
     //recv SQL file
-    socket.on('sendSQL', function (data, filename) {
+    socketWithS0.on('sendSQL', function (data, filename) {
         renewDB(data, filename);
     })
 
     //First connect to server send initial request & listen initial response
-    socket.emit('requestMaster'); 
-    socket.on('responseMaster', function(data){
+    socketWithS0.emit('requestMaster'); 
+    socketWithS0.on('responseMaster', function(data){
         askMaster(data,aimId);
     });
 
     //Listen for request master 
-    socket.on('requestMaster', function(){
-        socket.emit('responseMaster',master);
+    socketWithS0.on('requestMaster', function(){
+        socketWithS0.emit('responseMaster',master);
     });
 
-    socket.on('requestElection', function (data){
-        responseElection(socket,data);
+    socketWithS0.on('requestElection', function (data){
+        responseElection(socketWithS0,data);
     });
 
-    socket.on('delclareMaster', function (data){
-        recieveDelcareMaster(socket, data)
+    socketWithS0.on('delclareMaster', function (data){
+        recieveDelcareMaster(socketWithS0, data)
 
     });
 
-    socket.on('disconnect', function(){
-        disconnect(socket, aimId);
+    socketWithS0.on('disconnect', function(){
+        disconnect(socketWithS0, aimId);
     });
     // keep check if need to do master election 
-    setInterval(startElection(socket,aimId),1000/2);
+    setInterval(startElection,socketWithS0,aimId,1000/2);
     // keep check if need to do master declare
-    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+    setInterval(sendDeclareMaster,socketWithS0,aimId,1000/50);
 });
 
 // make connection with Server 1: port 5120
@@ -124,40 +125,40 @@ socketWithS1.on('connection', async function() {
     // if i am master
     //send sql file to this Server
     if(isMaster){
-        sendLocalSql(socket);
+        sendLocalSql(socketWithS1);
     }
     //recv SQL file
-    socket.on('sendSQL', function (data, filename) {
+    socketWithS1.on('sendSQL', function (data, filename) {
         renewDB(data, filename);
     })
 
     //First connect to server send initial request & listen initial response
-    socket.emit('requestMaster'); 
-    socket.on('responseMaster', function(data){
+    socketWithS1.emit('requestMaster'); 
+    socketWithS1.on('responseMaster', function(data){
         askMaster(data,aimId);
     });
 
     //Listen for request master 
-    socket.on('requestMaster', function(){
-        socket.emit('responseMaster',master);
+    socketWithS1.on('requestMaster', function(){
+        socketWithS1.emit('responseMaster',master);
     });
 
-    socket.on('requestElection', function (data){
-        responseElection(socket,data);
+    socketWithS1.on('requestElection', function (data){
+        responseElection(socketWithS1,data);
     });
 
-    socket.on('delclareMaster', function (data){
-        recieveDelcareMaster(socket, data)
+    socketWithS1.on('delclareMaster', function (data){
+        recieveDelcareMaster(socketWithS1, data)
 
     });
 
-    socket.on('disconnect', function(){
-        disconnect(socket, aimId);
+    socketWithS1.on('disconnect', function(){
+        disconnect(socketWithS1, aimId);
     });
     // keep check if need to do master election 
-    setInterval(startElection(socket,aimId),1000/2);
+    setInterval(startElection,socketWithS1,aimId,1000/2);
     // keep check if need to do master declare
-    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+    setInterval(sendDeclareMaster,socketWithS1,aimId,1000/50);
 });
 
 //port 5230 connects with server 3

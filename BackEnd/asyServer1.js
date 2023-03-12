@@ -67,7 +67,7 @@ var socketWithS0 = ioWithServer0.connect("http://localhost:5010/", {
     reconnection: true
 });
 
-socketWithS0.on('connection', async function(){
+socketWithS0.on('connect', async function(){
     let aimId=0;
     totalAlive++;
     // if i am master

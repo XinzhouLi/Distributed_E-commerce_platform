@@ -57,11 +57,12 @@ let declareMaster=false;
 let totalAlive=0;
 let id =0;
 let dbVersion=1;
-let isMaster = true;
+let isMaster = false;
 let master = -1;
 //initialize data
 let doneRequestWithTarget=[false,false,false,false,false];
 let doneDeclareMasterWithTarget=[false,false,false,false,false];
+let numNoMaster =0;
 
 
 //port 5010 connects with server 1

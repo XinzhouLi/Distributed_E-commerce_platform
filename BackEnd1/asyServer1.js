@@ -60,6 +60,7 @@ let master = -1;
 //initialize data
 let doneRequestWithTarget=[false,false,false,false,false];
 let doneDeclareMasterWithTarget=[false,false,false,false,false];
+let numNoMaster = 0;
 
 // make connection with Server 0: port 5010
 var ioWithServer0 = require('socket.io-client');
@@ -67,7 +68,7 @@ var socketWithS0 = ioWithServer0.connect("http://localhost:5010/", {
     reconnection: true
 });
 
-socketWithS0.on('connection', async function(){
+socketWithS0.on('connect', async function(){
     let aimId=0;
     console.log("s"+id+" connect to s"+aimId);
     totalAlive++;
@@ -77,43 +78,43 @@ socketWithS0.on('connection', async function(){
         sendLocalSql(socket);
     }
     //recv SQL file
-    socket.on('sendSQL', function (data, filename) {
+    socketWithS0.on('sendSQL', function (data, filename) {
         renewDB(data, filename);
     })
 
     //First connect to server send initial request & listen initial response
-    socket.emit('requestMaster'); 
-    socket.on('responseMaster', function(data){
+    socketWithS0.emit('requestMaster'); 
+    socketWithS0.on('responseMaster', function(data){
         askMaster(data,aimId);
     });
 
     //Listen for request master 
-    socket.on('requestMaster', function(){
-        socket.emit('responseMaster',master);
+    socketWithS0.on('requestMaster', function(){
+        socketWithS0.emit('responseMaster',master);
     });
 
-    socket.on('requestElection', function (data){
-        responseElection(socket,data);
+    socketWithS0.on('requestElection', function (data){
+        responseElection(socketWithS0,data);
     });
 
-    socket.on('delclareMaster', function (data){
-        recieveDelcareMaster(socket, data)
+    socketWithS0.on('delclareMaster', function (data){
+        recieveDelcareMaster(socketWithS0, data)
 
     });
 
-    socket.on('disconnect', function(){
-        disconnect(socket, aimId);
+    socketWithS0.on('disconnect', function(){
+        disconnect(socketWithS0, aimId);
     });
     // keep check if need to do master election 
-    setInterval(startElection(socket,aimId),1000/2);
+    setInterval(startElection,socketWithS0,aimId,1000/2);
     // keep check if need to do master declare
-    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+    setInterval(sendDeclareMaster,socketWithS0,aimId,1000/50);
 
 });
 
 //port 5120 connects with server 2
 const ioWithServer2 = require('socket.io')(5120);
-ioWithServer2.on('connection', async function (socket) {
+ioWithServer2.on('connect', async function (socket) {
     let aimId=2;
     console.log("s"+id+" connect to s"+aimId);
     totalAlive++;
@@ -243,8 +244,6 @@ ioWithServer4.on('connection', async function (socket) {
     // keep check if need to do master declare
     setInterval(sendDeclareMaster(socket,aimId),1000/50);
 });
-
-
 
 
 function askMaster(data, aimId){
