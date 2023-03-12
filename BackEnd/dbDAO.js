@@ -6,7 +6,7 @@ const sqlite3 = require('sqlite3');
 class Database {
     async connect() {
         return new Promise((resolve, reject) => {
-            this.db = new sqlite3.Database("db/master.db", (e) => {
+            this.db = new sqlite3.Database("BackEnd/db/master.db", (e) => {
                 if (e) {
                     reject(e);
                 } else {
