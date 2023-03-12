@@ -71,6 +71,8 @@ var socketWithS0 = ioWithServer0.connect("http://localhost:5020/", {
 
 socketWithS0.on('connection', async function() {
     let aimId=0;
+    console.log("I am here !!!!!")
+    console.log("s"+id+" connect to s"+aimId);
     totalAlive++;
     // if i am master
     //send sql file to this Server
@@ -119,6 +121,7 @@ var socketWithS1 = ioWithServer1.connect("http://localhost:5120/", {
 
 socketWithS1.on('connection', async function() {
     let aimId=1;
+    console.log("s"+id+" connect to s"+aimId);
     totalAlive++;
     // if i am master
     //send sql file to this Server
@@ -248,6 +251,7 @@ ioWithServer4.on('connection', async function (socket) {
 });
 
 function askMaster(data, aimId){
+    console.log("s"+id+" get ask master response from s"+aimId);
     if(data == -1 && master == -1){
         numNoMaster ++;
         // more than half servers have no master
@@ -268,6 +272,7 @@ function askMaster(data, aimId){
 }
 function startElection(socket,aimId){
     if(needElection && ! doneRequestWithTarget[aimId]){
+        console.log("s"+id+" send election request to s"+aimId);
         console.log("start election");
         doneRequestWithTarget[aimId]=true;
         //send my id & dbVersion
@@ -296,7 +301,9 @@ function startElection(socket,aimId){
 
 function sendDeclareMaster(socket,aimId){
     if(declareMaster&& !doneDeclareMasterWithTarget[aimId]){
+        console.log("s"+id+" declare master to s"+aimId);
         doneDeclareMasterWithTarget[aimId]=true;
+        console.log("I am master 0")
         socket.emit('declareMaster',id);
         socket.off('responseElection');
         isMaster=true;
@@ -305,7 +312,7 @@ function sendDeclareMaster(socket,aimId){
 }
 
 function responseElection(socket,data){
-    console.log("I recieve election request from: "+data)
+    console.log("s"+id+"responses election request to s"+data.id);
         let targetId=data.id;
         let targetDBVersion=data.dbVersion;
         if(dbVersion>targetDBVersion) {
@@ -326,6 +333,7 @@ function responseElection(socket,data){
 }
 
 function recieveDelcareMaster(socket,data){
+    console.log("s"+id+"recieve that s"+data+" become a master");
     //record master id
     socket.off('responseElection');
     master=data;
@@ -333,6 +341,7 @@ function recieveDelcareMaster(socket,data){
 }
 
 function disconnect(socket, aimId){
+    console.log("s"+aimId+" disconnect with s"+id);
     socket.disconnect();
     totalAlive--;
     // inform other active servers to record server state
@@ -351,4 +360,3 @@ function disconnect(socket, aimId){
 function sendLocalSql(socket){
 
 }
-

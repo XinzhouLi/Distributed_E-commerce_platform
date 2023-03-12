@@ -48,8 +48,6 @@ ioWithLoadBalancer.on('connection', function (socket) {
 
 });
 
-
-
 // Multiple server communication:
 //parameters for election
 let needElection=false;
@@ -66,28 +64,29 @@ let doneRequestWithTarget=[false,false,false,false,false];
 let doneDeclareMasterWithTarget=[false,false,false,false,false];
 
 
-
 //port 5010 connects with server 1
 const ioWithServer1 = require('socket.io')(5010);
 ioWithServer1.on('connection', async function (socket) {
-    console.log("0 connect to 1");
     let aimId=1;
+    console.log("s"+id+" connect to s"+aimId);
     totalAlive++;
     // if i am master
     //send sql file to this Server
     if(isMaster){
+        console.log("s0 is master");
         sendLocalSql(socket);
+    }else{
+        //First connect to server send initial request & listen initial response
+        console.log("s0 ask master with s"+aimId)
+        socket.emit('requestMaster'); 
+        socket.on('responseMaster', function(data){
+            askMaster(data,aimId);
+        });
     }
     //recv SQL file
     socket.on('sendSQL', function (data, filename) {
         renewDB(data, filename);
     })
-
-    //First connect to server send initial request & listen initial response
-    socket.emit('requestMaster'); 
-    socket.on('responseMaster', function(data){
-        askMaster(data,aimId);
-    });
 
     //Listen for request master 
     socket.on('requestMaster', function(){
@@ -116,24 +115,26 @@ ioWithServer1.on('connection', async function (socket) {
 //port 5020 connects with server 2
 const ioWithServer2 = require('socket.io')(5020);
 ioWithServer2.on('connection', async function (socket) {
-    console.log("0 connect to 2");
+    
     let aimId=2;
+    console.log("s"+id+" connect to s"+aimId);
     totalAlive++;
     // if i am master
     //send sql file to this Server
     if(isMaster){
         sendLocalSql(socket);
+    }else{
+        console.log("s0 ask master with s"+aimId)
+        socket.emit('requestMaster'); 
+        socket.on('responseMaster', function(data){
+            askMaster(data,aimId);
+        });
     }
     //recv SQL file
     socket.on('sendSQL', function (data, filename) {
         renewDB(data, filename);
     })
 
-    //First connect to server send initial request & listen initial response
-    socket.emit('requestMaster'); 
-    socket.on('responseMaster', function(data){
-        askMaster(data,aimId);
-    });
 
     //Listen for request master 
     socket.on('requestMaster', function(){
@@ -155,7 +156,7 @@ ioWithServer2.on('connection', async function (socket) {
     // keep check if need to do master election 
     setInterval(startElection, socket,aimId,1000/2);
     // keep check if need to do master declare
-    setInterval(sendDeclareMaster,socket,aimId,1000/50);
+    setInterval(sendDeclareMaster,socket,aimId,1000/2);
 });
 
 //port 5030 connects with server 3
@@ -168,6 +169,12 @@ ioWithServer3.on('connection', async function (socket) {
     //send sql file to this Server
     if(isMaster){
         sendLocalSql(socket);
+    }else{
+        console.log("s0 ask master with s"+aimId)
+        socket.emit('requestMaster'); 
+        socket.on('responseMaster', function(data){
+            askMaster(data,aimId);
+        });
     }
     //recv SQL file
     socket.on('sendSQL', function (data, filename) {
@@ -200,7 +207,7 @@ ioWithServer3.on('connection', async function (socket) {
     // keep check if need to do master election 
     setInterval(startElection(socket,aimId),1000/2);
     // keep check if need to do master declare
-    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+    setInterval(sendDeclareMaster(socket,aimId),1000/2);
 });
 
 //port 5040 connects with server 4
@@ -244,10 +251,11 @@ ioWithServer4.on('connection', async function (socket) {
     // keep check if need to do master election 
     setInterval(startElection(socket,aimId),1000/2);
     // keep check if need to do master declare
-    setInterval(sendDeclareMaster(socket,aimId),1000/50);
+    setInterval(sendDeclareMaster(socket,aimId),1000/2);
 });
 
 function askMaster(data, aimId){
+    console.log("s"+id+" get ask master response from s"+aimId);
     if(data == -1 && master == -1){
         numNoMaster ++;
         // more than half servers have no master
@@ -268,6 +276,7 @@ function askMaster(data, aimId){
 }
 function startElection(socket,aimId){
     if(needElection && ! doneRequestWithTarget[aimId]){
+        console.log("s"+id+" send election request to s"+aimId);
         console.log("start election");
         doneRequestWithTarget[aimId]=true;
         //send my id & dbVersion
@@ -296,6 +305,7 @@ function startElection(socket,aimId){
 
 function sendDeclareMaster(socket,aimId){
     if(declareMaster&& !doneDeclareMasterWithTarget[aimId]){
+        console.log("s"+id+" declare master to s"+aimId);
         doneDeclareMasterWithTarget[aimId]=true;
         console.log("I am master 0")
         socket.emit('declareMaster',id);
@@ -306,7 +316,7 @@ function sendDeclareMaster(socket,aimId){
 }
 
 function responseElection(socket,data){
-    console.log("I recieve election request from: "+data)
+    console.log("s"+id+"responses election request to s"+data.id);
         let targetId=data.id;
         let targetDBVersion=data.dbVersion;
         if(dbVersion>targetDBVersion) {
@@ -327,6 +337,7 @@ function responseElection(socket,data){
 }
 
 function recieveDelcareMaster(socket,data){
+    console.log("s"+id+"recieve that s"+data+" become a master");
     //record master id
     socket.off('responseElection');
     master=data;
@@ -334,6 +345,7 @@ function recieveDelcareMaster(socket,data){
 }
 
 function disconnect(socket, aimId){
+    console.log("s"+aimId+" disconnect with s"+id);
     socket.disconnect();
     totalAlive--;
     // inform other active servers to record server state
