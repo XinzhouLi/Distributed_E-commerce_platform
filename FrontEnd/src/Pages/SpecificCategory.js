@@ -4,20 +4,23 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { useNavigate,useParams } from 'react-router-dom';
 
 
-function Chair() {
+function SpecificCategory() {
 
   const navigate = useNavigate()
   const queryParam = new URLSearchParams(window.location.search)
+
+  const cateName = queryParam.get("cateName")
+  const obj1Name = queryParam.get("obj1")
+  const obj2Name = queryParam.get("obj2")
+  const obj3Name = queryParam.get("obj3")
+  const obj4Name = queryParam.get("obj4")
+
+  const imageURL = "https://source.unsplash.com/random/50×50/?"+cateName.toString()
   
-  const chair1Name = queryParam.get("chair1Name")
-  const chair2Name = queryParam.get("chair2Name")
-  const chair3Name = queryParam.get("chair3Name")
-  const chair4Name = queryParam.get("chair4Name")
 
   function handleBtnClick(e){
-    console.log(e.target.id)
     // socket.emit()
-    navigate('/Item?'+e.target.id.toString());
+    navigate('/Item?'+"cateName="+cateName.toString()+"&itemName="+e.target.id.toString());
   }
 
 
@@ -37,30 +40,30 @@ function Chair() {
         <Row>
         <Col>
         <Card style={{color : 'black'}}>
-        <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
+        <Card.Img src = {imageURL} />
           <Card.Body>
             <Card.Title>
-              {chair1Name}
+              {obj1Name}
             </Card.Title>
             <Card.Text>
               Something
             </Card.Text>
-            <Button id={chair1Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
+            <Button id={obj1Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
           </Card.Body>
         </Card>
         </Col>
 
         <Col>
         <Card style={{color : 'black'}}>
-        <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
+        <Card.Img src = {imageURL} />
           <Card.Body>
             <Card.Title>
-            {chair2Name}
+            {obj2Name}
             </Card.Title>
             <Card.Text>
               Something
             </Card.Text>
-            <Button id={chair2Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
+            <Button id={obj2Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
           </Card.Body>
         </Card>
         </Col>
@@ -70,30 +73,30 @@ function Chair() {
         <Row>
         <Col>
         <Card style={{color : 'black'}}>
-        <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
+        <Card.Img src = {imageURL} />
           <Card.Body>
             <Card.Title>
-            {chair3Name}
+            {obj3Name}
             </Card.Title>
             <Card.Text>
               Something
             </Card.Text>
-            <Button id={chair3Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
+            <Button id={obj3Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
           </Card.Body>
         </Card>
         </Col>
 
         <Col>
         <Card style={{color : 'black'}}>
-        <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
+        <Card.Img src = {imageURL} />
           <Card.Body>
             <Card.Title>
-            {chair4Name}
+            {obj4Name}
             </Card.Title>
             <Card.Text>
               Something
             </Card.Text>
-            <Button id={chair4Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
+            <Button id={obj4Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
           </Card.Body>
         </Card>
         </Col>
@@ -104,4 +107,4 @@ function Chair() {
   );
 }
 
-export default Chair;
+export default SpecificCategory;

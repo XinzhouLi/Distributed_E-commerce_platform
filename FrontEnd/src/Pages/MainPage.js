@@ -10,80 +10,43 @@ function MainPage() {
 	});
 
 	const navigate = useNavigate(); // react-router-dom v6
-	const [chairData,setChairData] = React.useState(null);
-	const [tableData,setTableData] = React.useState(null);
-	const [sofaData,setSofaData] = React.useState(null);
-	const [bedData,setbedData] = React.useState(null);
+	const [socketData,setSocketData] = React.useState(null);
 
 	useEffect(()=>{
-		if(chairData){
-			navigate(`/chair?${chairData}`);
+		if(socketData){
+			navigate(`/SpecificCategory?${socketData}`);
 		}
-	},[chairData,navigate])
+	},[socketData,navigate])
 
-	useEffect(()=>{
-		if(tableData){
-			navigate(`/table?tableData=${tableData}`);
-		}
-	},[tableData,navigate])
-
-	useEffect(()=>{
-		if(sofaData){
-			navigate(`/sofa?sofaData=${sofaData}`);
-		}
-	},[sofaData,navigate])
-
-	useEffect(()=>{
-		if(bedData){
-			navigate(`/bed?bedData=${bedData}`);
-		}
-	},[bedData,navigate])
-
-	const handleChairBtnClick = () => {
-		socket.emit("requestAllCateInfo", { "tableName": "chair" })
+	const handleBtnClick = (e) => {
+		const cateName =  e.target.id.toString();
+		socket.emit("requestAllCateInfo", { "tableName":cateName })
 		socket.on("responseAllCateInfo", async function (data) {
 			let ans = JSON.parse(data)
-			setChairData("chair1Name="+ans.content[0].chairName
-				+'&'+"chair2Name="+ans.content[1].chairName
-				+'&'+"chair3Name="+ans.content[2].chairName
-				+'&'+"chair4Name="+ans.content[3].chairName)
-			
-		})
-	}
-
-	const handleTableBtnClick = () => {
-		socket.emit("requestAllCateInfo", { "tableName": "tables" })
-		socket.on("responseAllCateInfo", async function (data) {
-			let ans = JSON.parse(data)
-			setTableData(ans.content[0].tableName
-				+'&'+ans.content[1].tableName
-				+'&'+ans.content[2].tableName
-				+'&'+ans.content[3].tableName)
-			
-		})
-	}
-
-	const handleSofaBtnClick = () => {
-		socket.emit("requestAllCateInfo", { "tableName": "sofa" })
-		socket.on("responseAllCateInfo", async function (data) {
-			let ans = JSON.parse(data)
-			setSofaData(ans.content[0].sofaName
-				+'&'+ans.content[1].sofaName
-				+'&'+ans.content[2].sofaName
-				+'&'+ans.content[3].sofaName)
-			
-		})
-	}
-
-	const handleBedBtnClick = (e) => {
-		socket.emit("requestAllCateInfo", { "tableName": e.target.id.toString() })
-		socket.on("responseAllCateInfo", async function (data) {
-			let ans = JSON.parse(data)
-			setbedData(ans.content[0].bedName
-				+'&'+ans.content[1].bedName
-				+'&'+ans.content[2].bedName
-				+'&'+ans.content[3].bedName)
-			
+			if(cateName === 'chair'){
+				setSocketData("cateName="+cateName+"&obj1="+ans.content[0].chairName
+				+'&'+"obj2="+ans.content[1].chairName
+				+'&'+"obj3="+ans.content[2].chairName
+				+'&'+"obj4="+ans.content[3].chairName)
+			}
+			if(cateName === 'tables'){
+				setSocketData("cateName="+cateName+"&obj1="+ans.content[0].tableName
+				+'&'+"obj2="+ans.content[1].tableName
+				+'&'+"obj3="+ans.content[2].tableName
+				+'&'+"obj4="+ans.content[3].tableName)
+			}
+			if(cateName === 'bed'){
+				setSocketData("cateName="+cateName+"&obj1="+ans.content[0].bedName
+				+'&'+"obj2="+ans.content[1].bedName
+				+'&'+"obj3="+ans.content[2].bedName
+				+'&'+"obj4="+ans.content[3].bedName)
+			}
+			if(cateName === 'sofa'){
+				setSocketData("cateName="+cateName+"&obj1="+ans.content[0].sofaName
+				+'&'+"obj2="+ans.content[1].sofaName
+				+'&'+"obj3="+ans.content[2].sofaName
+				+'&'+"obj4="+ans.content[3].sofaName)
+			}
 		})
 	}
 
@@ -112,7 +75,7 @@ function MainPage() {
 									<Card.Text>
 										Something
 									</Card.Text>
-									<Button id='chair' variant='primary' onClick={(e)=>handleChairBtnClick(e)}> Chair </Button>
+									<Button id='chair' variant='primary' onClick={(e)=>handleBtnClick(e)}> Chair </Button>
 								</Card.Body>
 							</Card>
 						</Col>
@@ -127,7 +90,7 @@ function MainPage() {
 									<Card.Text>
 										Something
 									</Card.Text>
-									<Button id='tables' variant='primary' onClick={(e)=>handleTableBtnClick(e)}> Table </Button>
+									<Button id='tables' variant='primary' onClick={(e)=>handleBtnClick(e)}> Table </Button>
 								</Card.Body>
 							</Card>
 						</Col>
@@ -145,7 +108,7 @@ function MainPage() {
 									<Card.Text>
 										Something
 									</Card.Text>
-									<Button id='bed' variant='primary' onClick={()=>handleBedBtnClick()}> Bed </Button>
+									<Button id='bed' variant='primary' onClick={(e)=>handleBtnClick(e)}> Bed </Button>
 								</Card.Body>
 							</Card>
 						</Col>
@@ -160,7 +123,7 @@ function MainPage() {
 									<Card.Text>
 										Something
 									</Card.Text>
-									<Button id='sofa' variant='primary' onClick={()=>handleSofaBtnClick()}> Sofa </Button>
+									<Button id='sofa' variant='primary' onClick={(e)=>handleBtnClick(e)}> Sofa </Button>
 								</Card.Body>
 							</Card>
 						</Col>
