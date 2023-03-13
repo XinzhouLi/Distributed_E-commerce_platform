@@ -1,6 +1,6 @@
 const sender = require("socket.io-client");
 
-let myId = "s2"
+let myId = "s0"
 // record all the connected server
 let socket_record = new Map();
 
@@ -14,9 +14,8 @@ let senderToS2 = sender.connect("http://localhost:5020/", {
     reconnection: true
 });
 
-let sender_record = [senderToS0,senderToS1,senderToS2]
 
-let receiver = require('socket.io')(5020);
+let receiver = require('socket.io')(5000);
 receiver.on("connect",(socket)=>{
     socket.join("broadCast")
 
@@ -25,8 +24,8 @@ receiver.on("connect",(socket)=>{
         console.log(data+" connected with id "+socket.id)
         socket_record.set(socket.id, {sName: data, sender:
                 data === "s0" ? senderToS0
-                    : data === "s1" ? senderToS1
-                        : data === "s2" ? senderToS1 : null
+                : data === "s1" ? senderToS1
+                    : data === "s2" ? senderToS1 : null
         })
 
     })
@@ -40,14 +39,11 @@ receiver.on("connect",(socket)=>{
 })
 
 // Sender listener 注册
-
-sender_record.forEach(registerListener)
 function registerListener(senderSocket) {
     senderSocket.on("connect", (data)=>{
         senderSocket.emit("who", myId)
     })
 }
-
 
 
 

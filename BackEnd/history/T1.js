@@ -1,28 +1,63 @@
+const sender = require("socket.io-client");
+
+let myId = "s1"
+// record all the connected server
+let socket_record = new Map();
+
+let senderToS0 = sender.connect("http://localhost:5000/", {
+    reconnection: true
+});
+let senderToS1 = sender.connect("http://localhost:5010/", {
+    reconnection: true
+});
+let senderToS2 = sender.connect("http://localhost:5020/", {
+    reconnection: true
+});
 
 
-let ser = require('socket.io')(3011);
-let socket_array = new Array()
-ser.on("connect",(socket)=>{
-    console.log(socket.id)
-    // ser.emit("id", socket.id)
-    f(socket)
+let receiver = require('socket.io')(5010);
+receiver.on("connect",(socket)=>{
+    socket.join("broadCast")
 
-    socket.on("who",(d)=>{
-        console.log(d)
-        socket_array.push({ d : socket.id})
+    // 注册接入的socket
+    socket.on("who",(data)=>{
+        console.log(data+" connected with id "+socket.id)
+        socket_record.set(socket.id, {sName: data, sender:
+                data === "s0" ? senderToS0 :
+                    data === "s1" ? senderToS1 :
+                        data === "s2" ? senderToS1 :
+                            null
+        })
+
     })
-    socket.on("reps",(data)=>{
-        console.log("jjjj")
-        console.log(data)
+
+    // 解注册某一个socket
+    socket.on("disconnect", (data)=>{
+        console.log(data+" connected with id "+socket.id)
+        socket_record.delete(socket.id)
     })
-    socket.on("disconnect",()=>{
-        console.log("/"+socket.id)
-    })
+
 })
 
+let sender_record = [senderToS0,senderToS1,senderToS2]
+// Sender listener 注册
+function registerListener(senderSocket) {
+    senderSocket.on("connect", (data)=>{
+        senderSocket.emit("who", myId)
+    })
+}
+
+
+
+
+
+
+
+
 setInterval(()=>{
-    console.log(socket_array)
-},1000)
+    console.log(socket_record)
+    // console.log()
+},5000)
 
 
 
