@@ -27,7 +27,7 @@
   "scripts": {
     "start_back": "node Proxy/loadBalancer.js & node BackEnd/history/Server1.js",
     "start_back2": "node Proxy/LB.js & node BackEnd/history/Server1.js",
-    "start_3s": "node BackEnd0/asyServer0.js & node BackEnd1/asyServer1.js &node BackEnd2/asyServer2.js ",
+    "start_3s": "node BackEnd0/fixedServer0.js & node BackEnd1/fixedServer1.js &node BackEnd2/fixedServer2.js ",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
