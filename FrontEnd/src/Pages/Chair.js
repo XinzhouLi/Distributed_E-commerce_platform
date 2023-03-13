@@ -1,16 +1,25 @@
-import React from 'react';
-import {Container, Row, Col, Button, Alert, Breadcrumb, Card, Form } from 'react-bootstrap'
+import React, { useEffect, useState }from 'react';
+import {Container, Row, Col, Button, Card, Form } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Navigate } from 'react-router-dom';
+import { useNavigate,useParams } from 'react-router-dom';
 
 
 function Chair() {
 
-  const [goToChair1, setGoToChair1] = React.useState(false)
+  const navigate = useNavigate()
+  const queryParam = new URLSearchParams(window.location.search)
+  
+  const chair1Name = queryParam.get("chair1Name")
+  const chair2Name = queryParam.get("chair2Name")
+  const chair3Name = queryParam.get("chair3Name")
+  const chair4Name = queryParam.get("chair4Name")
 
-  if(goToChair1){
-    return <Navigate to= "/Chair1"/>    
+  function handleBtnClick(e){
+    console.log(e.target.id)
+    // socket.emit()
+    navigate('/Item?'+e.target.id.toString());
   }
+
 
   return (
     <div className="App">
@@ -31,12 +40,12 @@ function Chair() {
         <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
           <Card.Body>
             <Card.Title>
-              Chair 1
+              {chair1Name}
             </Card.Title>
             <Card.Text>
               Something
             </Card.Text>
-            <Button variant='primary'> More </Button>
+            <Button id={chair1Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
           </Card.Body>
         </Card>
         </Col>
@@ -46,12 +55,12 @@ function Chair() {
         <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
           <Card.Body>
             <Card.Title>
-              Chair 2
+            {chair2Name}
             </Card.Title>
             <Card.Text>
               Something
             </Card.Text>
-            <Button variant='primary'> More </Button>
+            <Button id={chair2Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
           </Card.Body>
         </Card>
         </Col>
@@ -64,12 +73,12 @@ function Chair() {
         <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
           <Card.Body>
             <Card.Title>
-              Chair 3
+            {chair3Name}
             </Card.Title>
             <Card.Text>
               Something
             </Card.Text>
-            <Button variant='primary'> More </Button>
+            <Button id={chair3Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
           </Card.Body>
         </Card>
         </Col>
@@ -79,12 +88,12 @@ function Chair() {
         <Card.Img src = "https://source.unsplash.com/random/50×50/?chair" />
           <Card.Body>
             <Card.Title>
-              Chair 4
+            {chair4Name}
             </Card.Title>
             <Card.Text>
               Something
             </Card.Text>
-            <Button variant='primary'> More </Button>
+            <Button id={chair4Name} variant='primary' onClick={(e)=>handleBtnClick(e)}> More </Button>
           </Card.Body>
         </Card>
         </Col>

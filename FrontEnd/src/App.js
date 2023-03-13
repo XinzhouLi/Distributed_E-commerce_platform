@@ -1,14 +1,14 @@
-import React, { Component,useState, useEffect } from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
-import {Container, Row, Col, Button, Alert, Breadcrumb, Card, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import {BrowserRouter as Router, Route, Routes } from "react-router-dom"
 import MainPage from './Pages/MainPage';
 import Chair from './Pages/Chair';
+import Bed from './Pages/Bed';
+import Sofa from './Pages/Sofa';
+import Table from './Pages/Table';
 import Item from './Pages/Item';
 import Payment from './Pages/Payment';
-
 import socketConfig from './socketConfig.js';
 
 
@@ -41,7 +41,11 @@ function App (){
             <Routes>
               <Route path='/' element={<MainPage />}/>
               <Route path='/Chair' element={<Chair />}/>
+              <Route path='/Table' element={<Table />}/>
+              <Route path='/Sofa' element={<Sofa />}/>
+              <Route path='/Bed' element={<Bed />}/>
               <Route path='/Item' element={<Item />}/>
+              <Route path='/Payment' element={<Payment />}/>
               <Route path='*' element={<MainPage />}/>
             </Routes>
           </Router>

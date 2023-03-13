@@ -1,15 +1,22 @@
 import React from 'react';
 import {Container, Row, Col, Button, Alert, Breadcrumb, Card, Form } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 
-function Chair() {
+function Sofa() {
 
-  const [goToChair1, setGoToChair1] = React.useState(false)
+  const navigate = useNavigate()
+  const queryParam = new URLSearchParams(window.location.search)
+  const sofa1Name = queryParam.get("sofa1Name")
+  const sofa2Name = queryParam.get("sofa2Name")
+  const sofa3Name = queryParam.get("sofa3Name")
+  const sofa4Name = queryParam.get("sofa4Name")
 
-  if(goToChair1){
-    return <Navigate to= "/Chair1"/>    
+  function handleBtnClick(e){
+    console.log(e.target.id)
+    // socket.emit()
+    navigate('/Item?'+e.target.id.toString());
   }
 
   return (
@@ -36,7 +43,7 @@ function Chair() {
             <Card.Text>
               Something
             </Card.Text>
-            <Button variant='primary' onClick={()=>setGoToChair1(true)}> BUY </Button>
+            <Button variant='primary'> BUY </Button>
           </Card.Body>
         </Card>
         </Col>
@@ -133,4 +140,4 @@ function Chair() {
   );
 }
 
-export default Chair;
+export default Sofa;
