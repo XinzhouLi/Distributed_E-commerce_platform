@@ -5,10 +5,6 @@ import { useNavigate} from 'react-router-dom';
 import socketConfig from '../socketConfig.js';
 
 function MainPage() {
-	const [socket, setSocket] = useState(socketConfig, {
-		reconnection: true
-	});
-
 	const navigate = useNavigate(); // react-router-dom v6
 	const [socketData,setSocketData] = React.useState(null);
 
@@ -20,34 +16,7 @@ function MainPage() {
 
 	const handleBtnClick = (e) => {
 		const cateName =  e.target.id.toString();
-		socket.emit("requestAllCateInfo", { "tableName":cateName })
-		socket.on("responseAllCateInfo", async function (data) {
-			let ans = JSON.parse(data)
-			if(cateName === 'chair'){
-				setSocketData("cateName="+cateName+"&obj1="+ans.content[0].chairName
-				+'&'+"obj2="+ans.content[1].chairName
-				+'&'+"obj3="+ans.content[2].chairName
-				+'&'+"obj4="+ans.content[3].chairName)
-			}
-			if(cateName === 'tables'){
-				setSocketData("cateName="+cateName+"&obj1="+ans.content[0].tableName
-				+'&'+"obj2="+ans.content[1].tableName
-				+'&'+"obj3="+ans.content[2].tableName
-				+'&'+"obj4="+ans.content[3].tableName)
-			}
-			if(cateName === 'bed'){
-				setSocketData("cateName="+cateName+"&obj1="+ans.content[0].bedName
-				+'&'+"obj2="+ans.content[1].bedName
-				+'&'+"obj3="+ans.content[2].bedName
-				+'&'+"obj4="+ans.content[3].bedName)
-			}
-			if(cateName === 'sofa'){
-				setSocketData("cateName="+cateName+"&obj1="+ans.content[0].sofaName
-				+'&'+"obj2="+ans.content[1].sofaName
-				+'&'+"obj3="+ans.content[2].sofaName
-				+'&'+"obj4="+ans.content[3].sofaName)
-			}
-		})
+		setSocketData("cateName="+cateName)				
 	}
 
 
