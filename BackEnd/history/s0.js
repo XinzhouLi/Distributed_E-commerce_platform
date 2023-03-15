@@ -6,6 +6,7 @@ let minServerRequire=parseInt((totalServer/2));
 
 // Multiple server communication:
 //parameters for election
+let quitElection = false;
 let needElection=false;
 let electionReponseNum=0;
 let totalAlive=1;
@@ -22,38 +23,57 @@ let activeIo = require('socket.io-client');
 let socketWithS1 = activeIo.connect("http://localhost:6100/", {
     reconnection: true
 });
-registerListener(socketWithS1)
+registerListener(socketWithS1);
 
 // make connection with Server 2: port 7000
 let socketWithS2 = activeIo.connect("http://localhost:7100/", {
     reconnection: true
 });
-registerListener(socketWithS2)
+registerListener(socketWithS2);
 
 //port 5000 as server side to receive s1 and s2 messages
 const ioS0 = require('socket.io')(5100);
 ioS0.on('connect', async function(socket){
     totalAlive ++;
+    console.log("Current alive: ", totalAlive);
     socket.join("serverRoom");
     socket.emit('who')
     socket.on('iam', (data)=>{
         console.log(id, "connected with "+ data)
         activeSocket.set(data, {react :socket,  acti: data === 1 ? socketWithS1 : socketWithS2})
+        //console.log(activeSocket);
     })
 
-
-
-
     //都是可以被复制的
-    //send sql file to all Servers
-    if(isMaster){
-        console.log("s0 is master");
-        sendLocalSql();
-    }else if(totalAlive >= 2) {
-        console.log("start checking ")
-        socketWithS1.emit('requestMaster');
-        socketWithS2.emit('requestMaster');
-    }
+    //预留三秒时间 等待连接并存储socket的信息，否则会出现回调问题   
+    let t0 =setTimeout(()=>{
+        if(isMaster){
+            console.log("s0 is master");
+            sendLocalSql();
+        }else if(totalAlive >= 3) {
+            //console.log(activeSocket);
+            console.log("start checking ")
+            for (let[key, value] of activeSocket){
+                if(value.react === socket){
+                    value.acti.emit('requestMaster');
+                }
+            }
+        }
+    }, 3000);
+    // //send sql file to all Servers
+    // if(isMaster){
+    //     console.log("s0 is master");
+    //     sendLocalSql();
+    // }else if(totalAlive >= 3) {
+    //     console.log("start checking ")
+    //     // for (let[key, value] of activeSocket){
+    //     //     if(value.acti === socket){
+    //     //         value.acti.emit('requestMaster');
+    //     //     }
+    //     // }
+    //     socketWithS1.emit('requestMaster');
+    //     socketWithS2.emit('requestMaster');
+    // }
 
     //Listen for request master
     socket.on('requestMaster', function(){
@@ -68,6 +88,28 @@ ioS0.on('connect', async function(socket){
         master = data
         console.log("Master changed to "+master)
     })
+
+    socket.on('disconnect', ()=>{
+        totalAlive --;
+        console.log("disconnect, remaining alive: ", totalAlive);
+        let offServer;
+        // delete off server info
+        for (let[key, value] of activeSocket){
+            if(value.react === socket){
+                offServer = key;
+                activeSocket.delete(key);
+            }
+        }
+
+        if(offServer == master) {
+            console.log("Master failed, start leader election");
+            electionReponseNum = 0;
+            for (let[key, value] of activeSocket){
+                startElection(value.acti, id, key);
+            }
+        }
+        
+    });
 
 
     //recv SQL file
@@ -89,7 +131,7 @@ function registerListener(sendSocket) {
         askMaster(response);
     });
     sendSocket.on('who', ()=>{
-        sendSocket.emit('iam',id)
+        sendSocket.emit('iam',id);
     })
     sendSocket.on('responseElection', function(data){
         if(data===0){
@@ -97,13 +139,17 @@ function registerListener(sendSocket) {
             quitElection=true;
             electionReponseNum++;
         }else if(data ==1){
+            quitElection = false;
             electionReponseNum++;
         }else{
             //error should only be 1 or 0
+            quitElection = false;
             console.log("election response error : "+data)
         }
-        console.log(totalAlive)
-        if(electionReponseNum===totalAlive){
+        //console.log(totalAlive)
+        console.log('electionReponseNum from s0 '+electionReponseNum)
+        console.log("totalAlive from s0 "+totalAlive)
+        if(electionReponseNum===(totalAlive-1)){
             if(!quitElection){
                 //broadcast I am new leader!!!
                 console.log(id+" am the leader now")
@@ -138,7 +184,7 @@ function askMaster(response){
         numNoMaster ++;
         console.log("numMa" + numNoMaster, "min req" + minServerRequire)
         // more than half servers have no master
-        if(numNoMaster>minServerRequire){
+        if(numNoMaster>=minServerRequire){
             // start leader election
             numNoMaster = 0;
             console.log("start leader election");
@@ -151,6 +197,7 @@ function askMaster(response){
     }
     else if(response != -1){
         master = response;
+        console.log("master changed to ",master);
     }
 }
 
@@ -162,7 +209,7 @@ function startElection(socket, id, aimId){
 }
 
 function responseElection(socket,data){
-    console.log("s"+id+"responses election request to s"+data.id);
+    console.log("s"+id+" responses election request to s"+data.id);
     let targetId=data.id;
     let targetDBVersion=data.dbVersion;
 
