@@ -27,7 +27,6 @@ INSERT INTO orderInfo VALUES(5,'ABDC','Neo','188 harvest rose','7563888855742057
 INSERT INTO orderInfo VALUES(6,'RTERT','Leon','188 harvest rose','3563888855742057','05/16',826,'Table88');
 INSERT INTO orderInfo VALUES(8,'8TERT','zhao','188 harvest rose','9563888855742057','05/16',826,'Table88');
 INSERT INTO orderInfo VALUES(12,'ABDC','bob','188 harvest rose','1563888855742057','05/16',826,'Table88');
-INSERT INTO orderInfo VALUES(14,'YEBD','chao','188 harvest rose','4563888855742057','05/16',826,'Table88');
 CREATE TABLE version(id  integer primary key autoincrement, versionNum integer);
 INSERT INTO version VALUES(1,1);
 DELETE FROM sqlite_sequence;

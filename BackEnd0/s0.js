@@ -223,8 +223,8 @@ function registerListener(sendSocket) {
 }
 
 function askMaster(response, socket){
-    console.log("recieve master response"+response);
-    console.log("Master is "+ master);
+    console.log("recieve master response is"+response);
+    // console.log("Master is "+ master);
     if(response == -1 && master == -1){
         numNoMaster ++;
         console.log("numMa" + numNoMaster, "min req" + minServerRequire)

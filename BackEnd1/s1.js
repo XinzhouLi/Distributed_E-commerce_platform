@@ -230,6 +230,7 @@ function askMaster(response,socket){
     }
     else if(response != -1){
         master = response;
+        console.log("master changed to ",master);
     }
 }
 
