@@ -13,7 +13,7 @@ let minServerRequire=parseInt((totalServer/2));
 //     console.log('Server 0: connected with Load Balancer:', socket.client.id);
 
 //     socket.on('requestSingleItem', async function (data) {
-//         let input = JSON.parse(data)
+//         let input = data
 //         console.log('Server0: Send in Query')
 //         let result = await DB.getInfoByID(input.tableName, input.idName, input.id)
 //         socket.emit('responseSingleItemInfo', result)
@@ -21,7 +21,7 @@ let minServerRequire=parseInt((totalServer/2));
 //     });
 
 //     socket.on('requestAllCateInfo', async function (data) {
-//         let input = JSON.parse(data)
+//         let input = data
 //         console.log('Server0: Send in Query')
 //         let result = await DB.getAllInfo(input.tableName)
 //         socket.emit('responseAllCateInfo', result)
@@ -29,7 +29,7 @@ let minServerRequire=parseInt((totalServer/2));
 //     });
 
 //     socket.on('addOrder', async function (data) {
-//         let input = JSON.parse(data)
+//         let input = data
 //         console.log('Server0: Send in Query')
 //         let result
 //         try {

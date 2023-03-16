@@ -29,7 +29,7 @@ function SpecificCategory() {
   useEffect(() => {
     socket.emit("requestAllCateInfo", { "tableName":cateName })
     socket.on("responseAllCateInfo", function (data) {
-        let socketData = JSON.parse(data)
+        let socketData = data
         setObj1Name(socketData.content[0].itemName)
         setObj2Name(socketData.content[1].itemName)
         setObj3Name(socketData.content[2].itemName)

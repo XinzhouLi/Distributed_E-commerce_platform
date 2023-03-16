@@ -115,7 +115,7 @@ async function applyMasterSQL(dbName, data, filename) {
   let db = new dbFile.Database();
   console.log(data);
   await writeFile("db/" + filename, data);
-  await db.connect(dbName);
+  await db.connect();
   // later for increase the speed of process to make it to Promiss.all
   await db.run("DROP TABLE IF EXISTS bed");
   await db.run("DROP TABLE IF EXISTS chair");

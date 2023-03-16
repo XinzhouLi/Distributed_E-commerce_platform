@@ -167,7 +167,7 @@ socketWithS1.on('connect', function () {
             socketWithS1.emit('requestAllCateInfo', reqestAllCateInfo);
             serverCurrentTask.server1 = 0;
             socketWithS1.on('responseAllCateInfo', function(data){
-                console.log(JSON.parse(data));
+                console.log(data);
                 responseAllCateInfo = data;
             });
             serverStatus.server1 = 0;

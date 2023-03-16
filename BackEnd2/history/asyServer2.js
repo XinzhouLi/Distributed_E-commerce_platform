@@ -12,7 +12,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
     console.log('Server 2: connected with Load Balancer:', socket.client.id);
 
     socket.on('requestSingleItem', async function (data) {
-        let input = JSON.parse(data)
+        let input = data
         console.log('Server2: Send in Query')
         let result = await DB.getInfoByID(input.tableName, input.idName, input.id)
         socket.emit('responseSingleItemInfo', result)
@@ -20,7 +20,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
     });
 
     socket.on('requestAllCateInfo', async function (data) {
-        let input = JSON.parse(data)
+        let input = data
         console.log('Server1: Send in Query')
         let result = await DB.getAllInfo(input.tableName)
         socket.emit('responseAllCateInfo', result)
@@ -28,7 +28,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
     });
 
     socket.on('addOrder', async function (data) {
-        let input = JSON.parse(data)
+        let input = data
         console.log('Server2: Send in Query')
         let result
         try {

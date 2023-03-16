@@ -85,7 +85,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
     // socket.on('requestOrderInfo', function(data) {
     //     // ***** Edit ******
     //     // connect to dbserver
-    //     let Jobj = JSON.parse(data);
+    //     let Jobj = data;
     //     let response = DB.getInfoByID(Jobj.tableName, Jobj.IdName, Jobj.Id)
     //     // ***** EDit ******
     //     // only add to db, if sucess, emit 1
