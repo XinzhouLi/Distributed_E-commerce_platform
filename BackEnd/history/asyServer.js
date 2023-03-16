@@ -1,4 +1,4 @@
-const DB = require('./asyDB')
+const DB = require('../asyDB')
 
 // port 5100: connect with load balancer
 const ioWithLoadBalancer = require('socket.io')(5100);

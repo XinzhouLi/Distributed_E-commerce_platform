@@ -124,4 +124,4 @@ exports.getInfoByID = getInfoByID;
 exports.editItemQuantity = editItemQuantity;
 exports.insertOrder = insertOrder;
 exports.applyMasterSQL = applyMasterSQL;
-exports.dumpLocalSQL = dumpLocalSQL;
+exports.sendLocalSQL = sendLocalSQL;

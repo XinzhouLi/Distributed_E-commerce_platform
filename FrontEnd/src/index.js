@@ -2,8 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { Component } from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
 // let io = require("socket.io-client")
 // let socket = io.connect("http://localhost:3010/",{

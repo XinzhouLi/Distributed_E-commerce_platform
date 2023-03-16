@@ -4,17 +4,17 @@ const sqlite3 = require('sqlite3');
 
 
 class Database {
-    async connect(dbName) {
+    async connect() {
         return new Promise((resolve, reject) => {
-          this.db = new sqlite3.Database("db/" + dbName, (e) => {
-            if (e) {
-              reject(e);
-            } else {
-              resolve();
-            }
-          });
+            this.db = new sqlite3.Database("db/master.db", (e) => {
+                if (e) {
+                    reject(e);
+                } else {
+                    resolve();
+                }
+            });
         });
-      }
+    }
 
     async get(sql, params = []) {
         return new Promise((resolve, reject) => {
