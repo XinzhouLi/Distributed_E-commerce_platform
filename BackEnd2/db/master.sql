@@ -16,7 +16,7 @@ INSERT INTO sofa VALUES(2,'s02','sofa2',99,'This is a lovely sofa','90sd90asda90
 INSERT INTO sofa VALUES(3,'s03','sofa3',95,'This is a great sofa','3qe21exqwxdqw3xeqw');
 INSERT INTO sofa VALUES(4,'s04','sofa4',86,'This is a write sofa','3eq3ceq32xeqeqxw');
 CREATE TABLE bed(id  integer primary key autoincrement,itemId text,itemName text, quantity integer, description text, image text);
-INSERT INTO bed VALUES(1,'b01','bed1',92,'This is a pretty bed','90sd90asda90sf8a0gas');
+INSERT INTO bed VALUES(1,'b01','bed1',90,'This is a pretty bed','90sd90asda90sf8a0gas');
 INSERT INTO bed VALUES(2,'b02','bed2',99,'This is a cute bed','90sd90asda90sf8a0gas');
 INSERT INTO bed VALUES(3,'b03','bed3',95,'This is a lovely bed','asdasdasdassd');
 INSERT INTO bed VALUES(4,'b04','bed4',86,'This is a black bed','3erwv45w3423c');
@@ -27,6 +27,7 @@ INSERT INTO orderInfo VALUES(5,'ABDC','Neo','188 harvest rose','7563888855742057
 INSERT INTO orderInfo VALUES(6,'RTERT','Leon','188 harvest rose','3563888855742057','05/16',826,'Table88');
 INSERT INTO orderInfo VALUES(8,'8TERT','zhao','188 harvest rose','9563888855742057','05/16',826,'Table88');
 INSERT INTO orderInfo VALUES(12,'ABDC','bob','188 harvest rose','1563888855742057','05/16',826,'Table88');
+INSERT INTO orderInfo VALUES(14,'YEBD','chao','188 harvest rose','4563888855742057','05/16',826,'Table88');
 CREATE TABLE version(id  integer primary key autoincrement, versionNum integer);
 INSERT INTO version VALUES(1,1);
 DELETE FROM sqlite_sequence;
@@ -34,6 +35,6 @@ INSERT INTO sqlite_sequence VALUES('chair',4);
 INSERT INTO sqlite_sequence VALUES('tables',4);
 INSERT INTO sqlite_sequence VALUES('sofa',4);
 INSERT INTO sqlite_sequence VALUES('bed',4);
-INSERT INTO sqlite_sequence VALUES('orderInfo',13);
+INSERT INTO sqlite_sequence VALUES('orderInfo',14);
 INSERT INTO sqlite_sequence VALUES('version',5);
 COMMIT;

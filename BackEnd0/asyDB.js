@@ -64,9 +64,10 @@ async function editItemQuantity(tableName, idName, id, quantityToBuy) {
   let query2 =
     'UPDATE "' + tableName + '" SET quantity = ? WHERE "' + idName + '" = ?';
   // console.log(query2)
+  // console.log("quantity: "+new_quantity+" id: "+id)
   await db.run(query2, [new_quantity, id]);
 }
-
+// insertOrderData example: "'YEBD','chao','188 harvest rose','4563888855742057','05/16','826','Table88'"
 async function insertOrder(OrderData) {
   let db = new dbFile.Database();
   await db.connect();
@@ -115,7 +116,7 @@ async function applyMasterSQL(dbName, data, filename) {
   let db = new dbFile.Database();
   console.log(data);
   await writeFile("db/" + filename, data);
-  await db.connect(dbName);
+  await db.connect();
   // later for increase the speed of process to make it to Promiss.all
   await db.run("DROP TABLE IF EXISTS bed");
   await db.run("DROP TABLE IF EXISTS chair");
