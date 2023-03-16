@@ -3,16 +3,15 @@ const ioWithFrontEnd = require('socket.io')(3012, {
         origin: '*',
     }
 });
-let totalNumServer = 0;
-let currentServer = 1;
-let thisServerA = 0;
-let thisServerT = 0;
-let thisServer1 = 0;
-let thisServer2 = 0;
-let thisServer3 = 0;
-let thisServer4 = 0;
-let thisServer5 = 0;
-const serverList = new Array();
+var totalNumServer = 0;
+var currentServer = 1;
+var thisServer1 = 0;
+var thisServer2 = 0;
+var thisServer3 = 0;
+var thisServer4 = 0;
+var thisServer5 = 0;
+var serverList = new Array();
+var serverNumList = new Array();
 
 // // make connection with test server: port 6000
 // var ioWithServerTest = require('socket.io-client');
@@ -97,17 +96,24 @@ socketWithS1.on('connect', function () {
     console.log(totalNumServer);
     totalNumServer++;
     thisServer1 = totalNumServer;
+    var serverNum1 = {
+        socket: socketWithS1, 
+        serverNum: thisServer1
+    };
+    console.log(serverNum1);
     serverList.push(socketWithS1);
+    serverNumList.push(serverNum1);
     console.log('Load Balancer connected to localhost:5101 with Test Server, totalNumServer: ' + totalNumServer);
-
+    console.log('This server is ' + thisServer1 + ' in serverList');
     socketWithS1.once("disconnect", (reason) => {
         console.log("5101 disconnected because of " + reason);
         totalNumServer--;
         //console.log("currentServer after dddddddd: " + currentServer);
         serverList.splice(thisServer1 - 1, 1);
+        console.log(serverNum1);
+        checkThisServer(serverNum1);
         console.log("totalNumServer after deleted: " + totalNumServer);
-        checkThisServer(socketWithS1);
-        console.log("Server " + thisServer1 + " was deleted");
+        console.log("Server " + thisServer1 + " was deleted, now sever1 is " + serverNumList[0].serverNum, " server2 is " + serverNumList[1].serverNum);
         if (currentServer > totalNumServer) {
             console.log("totalNumServerNow: " + totalNumServer);
             console.log("currentServerNow: " + currentServer)
@@ -130,17 +136,22 @@ socketWithS2.on('connect', function () {
     console.log(totalNumServer);
     totalNumServer++;
     thisServer2 = totalNumServer;
+    var serverNum2 = {
+        socket: socketWithS2, 
+        serverNum: thisServer2
+    };
     serverList.push(socketWithS2);
+    serverNumList.push(serverNum2);
     console.log('Load Balancer connected to localhost:5200 with Test Server, totalNumServer: ' + totalNumServer);
-
+    console.log('This server is ' + thisServer2 + ' in serverList');
     socketWithS2.once("disconnect", (reason) => {
         console.log("5200 disconnected because of " + reason);
         totalNumServer--;
         //console.log("currentServer after dddddddd: " + currentServer);
         serverList.splice(thisServer2 - 1, 1);
+        checkThisServer(serverNum2);
         console.log("totalNumServer after deleted: " + totalNumServer);
-        checkThisServer(socketWithS2);
-        console.log("Server " + thisServer2 + " was deleted");
+        console.log("Server " + thisServer2 + " was deleted, now sever1 is " + serverNumList[0].serverNum, " server2 is " + serverNumList[1].serverNum);
         if (currentServer > totalNumServer) {
             console.log("totalNumServerNow: " + totalNumServer);
             console.log("currentServerNow: " + currentServer)
@@ -163,17 +174,22 @@ socketWithS3.on('connect', function () {
     console.log(totalNumServer);
     totalNumServer++;
     thisServer3 = totalNumServer;
+    var serverNum3 = {
+        socket: socketWithS3, 
+        serverNum: thisServer3
+    };
     serverList.push(socketWithS3);
+    serverNumList.push(serverNum3);
     console.log('Load Balancer connected to localhost:5300 with Test Server, totalNumServer: ' + totalNumServer);
-
+    console.log('This server is ' + thisServer3 + ' in serverList');
     socketWithS3.once("disconnect", (reason) => {
         console.log("5300 disconnected because of " + reason);
         totalNumServer--;
         //console.log("currentServer after dddddddd: " + currentServer);
         serverList.splice(thisServer3 - 1, 1);
+        checkThisServer(serverNum3);
         console.log("totalNumServer after deleted: " + totalNumServer);
-        checkThisServer(socketWithS3);
-        console.log("Server " + thisServer3 + " was deleted");
+        console.log("Server " + thisServer3 + " was deleted, now sever1 is " + serverNumList[0].serverNum, " server2 is " + serverNumList[1].serverNum);
         if (currentServer > totalNumServer) {
             console.log("totalNumServerNow: " + totalNumServer);
             console.log("currentServerNow: " + currentServer)
@@ -195,7 +211,7 @@ socketWithS3.on('connect', function () {
 // socketWithS4.on('connect', function () {
 //     console.log(totalNumServer);
 //     totalNumServer++;
-//     thisServer4 = totalNumServer;
+//     serverNumList[socketWithS4] = totalNumServer;
 //     serverList.push(socketWithS4);
 //     console.log('Load Balancer connected to localhost:5400 with Test Server, totalNumServer: ' + totalNumServer);
 
@@ -203,10 +219,10 @@ socketWithS3.on('connect', function () {
 //         console.log("5400 disconnected because of " + reason);
 //         totalNumServer--;
 //         //console.log("currentServer after dddddddd: " + currentServer);
-//         serverList.splice(thisServer4 - 1, 1);
+//         serverList.splice(serverNumList[socketWithS4] - 1, 1);
 //         console.log("totalNumServer after deleted: " + totalNumServer);
 //         checkThisServer(socketWithS4);
-//         console.log("Server " + thisServer4 + " was deleted");
+//         console.log("Server " + serverNumList[socketWithS4] + " was deleted");
 //         if (currentServer > totalNumServer) {
 //             console.log("totalNumServerNow: " + totalNumServer);
 //             console.log("currentServerNow: " + currentServer)
@@ -228,7 +244,7 @@ socketWithS3.on('connect', function () {
 // socketWithS5.on('connect', function () {
 //     console.log(totalNumServer);
 //     totalNumServer++;
-//     thisServer5 = totalNumServer;
+//     serverNumList[socketWithS5] = totalNumServer;
 //     serverList.push(socketWithS5);
 //     console.log('Load Balancer connected to localhost:5500 with Test Server, totalNumServer: ' + totalNumServer);
 
@@ -236,10 +252,10 @@ socketWithS3.on('connect', function () {
 //         console.log("5500 disconnected because of " + reason);
 //         totalNumServer--;
 //         //console.log("currentServer after dddddddd: " + currentServer);
-//         serverList.splice(thisServer5 - 1, 1);
+//         serverList.splice(serverNumList[socketWithS5] - 1, 1);
 //         console.log("totalNumServer after deleted: " + totalNumServer);
 //         checkThisServer(socketWithS5);
-//         console.log("Server " + thisServer5 + " was deleted");
+//         console.log("Server " + serverNumList[socketWithS5] + " was deleted");
 //         if (currentServer > totalNumServer) {
 //             console.log("totalNumServerNow: " + totalNumServer);
 //             console.log("currentServerNow: " + currentServer)
@@ -342,36 +358,30 @@ ioWithFrontEnd.on("connection", function (socketWithFront) {
 })
 
 
-function checkThisServer(socket){
-    if(socket == socketWithS1){
-        thisServer2--;
-        thisServer3--;
-        thisServer4--;
-        thisServer5--;
+function checkThisServer(socketObj){
+    console.log("--------------------   checkThisServer   --------------------")
+    for(let obj in serverList){
+        console.log("serverList[" + obj + "]: " + obj.serverNum);
+        if(obj.serverNum > socketObj.serverNum){
+            obj.serverNum--;
+        }
+        if(obj.serverNum == socketObj.serverNum){
+            serverList.splice(obj, 1);
+        }
+            
     }
-    if(socket == socketWithS2){
-        thisServer1--;
-        thisServer3--;
-        thisServer4--;
-        thisServer5--;
-    }
-    if(socket == socketWithS3){
-        thisServer1--;
-        thisServer2--;
-        thisServer4--;
-        thisServer5--;
-    }
+    
     // if(socket == socketWithS4){
-    //     thisServer1--;
-    //     thisServer2--;
-    //     thisServer3--;
-    //     thisServer5--;
+    //     serverNumList[socketWithS1]--;
+    //     serverNumList[socketWithS2]--;
+    //     serverNumList[socketWithS3]--;
+    //     serverNumList[socketWithS5]--;
     // }
     // if(socket == socketWithS5){
-    //     thisServer1--;
-    //     thisServer2--;
-    //     thisServer3--;
-    //     thisServer4--;
+    //     serverNumList[socketWithS1]--;
+    //     serverNumList[socketWithS2]--;
+    //     serverNumList[socketWithS3]--;
+    //     serverNumList[socketWithS4]--;
     // }
 
     // if(socket == socketWithST)
