@@ -1,4 +1,4 @@
-// const DB = require('./asyDB')
+const DB = require('./asyDB')
 
 let totalServer=3;
 
@@ -10,44 +10,92 @@ let quitElection = false;
 let needElection=false;
 let electionReponseNum=0;
 let totalAlive=1;
-let id =2;
+let id =0;
 let dbVersion=1;
 let isMaster = false;
 let master = -1;
 
 let numNoMaster =0;
 let activeSocket = new Map();
-let doneRequestMaster = [false, false, false];
+let db = "db0.db";
+
+const ioWithLoadBalancer = require('socket.io')(5101);
+ioWithLoadBalancer.on('connection', function (socket) {
+    console.log('Server 0: connected with Load Balancer:', socket.client.id);
+
+    socket.on('requestSingleItem', async function (data) {
+        let input = JSON.parse(data)
+        console.log('Server0: Send in Query')
+        let result = await DB.getInfoByID(input.tableName, input.idName, input.id)
+        socket.emit('responseSingleItemInfo', result)
+        console.log("Server0: Send back", result)
+    });
+
+    socket.on('requestAllCateInfo', async function (data) {
+        // let input = JSON.parse(data)
+        let input = data;
+        console.log('Server0: Send in Query')
+        let result = await DB.getAllInfo(input.tableName)
+        socket.emit('responseAllCateInfo', result)
+        console.log("Server0: Send back", result)
+    });
+
+    socket.on('addOrder', async function (data) {
+        let input = JSON.parse(data)
+        console.log('Server0: Send in Query')
+        let result
+        try {
+            await DB.editItemQuantity(input.tableName, input.idName, input.id, input.quantityToBuy)
+            await DB.insertOrder(input.insertOrderData)
+            await DB.insertVersion()
+        } catch (e) {
+            result = JSON.stringify({status: 0, content: e.message})
+            socket.emit('responseUserOrderStatus', result)
+        }
+        result = JSON.stringify({status: 1, content: "Order successfully placed"})
+        socket.emit('responseUserOrderStatus', result)
+
+        console.log("Server0: Send back", result)
+    });
+
+});
 
 // make connection with Server 1: port 6000
 let activeIo = require('socket.io-client');
-let socketWithS0 = activeIo.connect("http://localhost:5100/", {
-    reconnection: true
-});
-registerListener(socketWithS0)
-
 let socketWithS1 = activeIo.connect("http://localhost:6100/", {
     reconnection: true
 });
 registerListener(socketWithS1);
 
-const ioS2 = require('socket.io')(7100);
-ioS2.on('connect', async function(socket){
+// make connection with Server 2: port 7000
+let socketWithS2 = activeIo.connect("http://localhost:7100/", {
+    reconnection: true
+});
+registerListener(socketWithS2);
+
+//port 5000 as server side to receive s1 and s2 messages
+const ioS0 = require('socket.io')(5100);
+ioS0.on('connect', async function(socket){
     totalAlive ++;
+
     console.log("Current alive: ", totalAlive);
     socket.join("serverRoom");
     socket.emit('who')
     socket.on('iam', (data)=>{
         console.log(id, "connected with "+ data)
-        activeSocket.set(data, {react :socket,  acti: data === 0 ? socketWithS0 : socketWithS1});
+        activeSocket.set(data, {react :socket,  acti: data === 1 ? socketWithS1 : socketWithS2})
         //console.log(activeSocket);
     })
+    if(isMaster){
+        console.log("S1 SQL file sent to slave");
+        await DB.sendLocalSQL(db, socket);
+    }
 
     //都是可以被复制的
+    //预留三秒时间 等待连接并存储socket的信息，否则会出现回调问题   
     let t0 =setTimeout(()=>{
         if(isMaster){
-            console.log("s2 is master");
-            sendLocalSql();
+            console.log("s0 is master");
         }else if(totalAlive >= 3) {
             //console.log(activeSocket);
             console.log("start checking ")
@@ -57,31 +105,20 @@ ioS2.on('connect', async function(socket){
                 }
             }
         }
-    }, 3000);
-    //send sql file to all Servers
+    }, 5000);
+    // //send sql file to all Servers
     // if(isMaster){
     //     console.log("s0 is master");
     //     sendLocalSql();
     // }else if(totalAlive >= 3) {
     //     console.log("start checking ")
-    //     for (let[key, value] of activeSocket){
-    //         if(value.acti === socket){
-    //             value.acti.emit('requestMaster');
-    //         }
-    //     }
-
-    //     // if(!doneRequestMaster[0]){
-    //     //     doneRequestMaster[0]=true;
-    //     //     socketWithS0.emit('requestMaster');
+    //     // for (let[key, value] of activeSocket){
+    //     //     if(value.acti === socket){
+    //     //         value.acti.emit('requestMaster');
+    //     //     }
     //     // }
-    //     // if(!doneRequestMaster[1]){
-    //     //     doneRequestMaster[1]=true;
-    //     //     socketWithS1.emit('requestMaster');
-    //     // }
-
-
-    //     // socketWithS0.emit('requestMaster');
-    //     // socketWithS1.emit('requestMaster');
+    //     socketWithS1.emit('requestMaster');
+    //     socketWithS2.emit('requestMaster');
     // }
 
     //Listen for request master
@@ -94,9 +131,15 @@ ioS2.on('connect', async function(socket){
     });
 
     socket.on('declareMaster',(data)=>{
+        console.log("receive declare master from server"+data);
         master = data
         console.log("Master changed to "+master)
     })
+
+    socket.on('sendSQL', function(data, filename){
+        DB.applyMasterSQL(db, data, filename);
+        console.log("Receive SQL file from master");
+    });
 
     socket.on('disconnect', ()=>{
         totalAlive --;
@@ -137,12 +180,12 @@ ioS2.on('connect', async function(socket){
 function registerListener(sendSocket) {
 
     sendSocket.on('responseMaster', function(response){
-        askMaster(response);
+        askMaster(response,sendSocket);
     });
     sendSocket.on('who', ()=>{
         sendSocket.emit('iam',id);
     })
-    sendSocket.on('responseElection', function(data){
+    sendSocket.on('responseElection', async function(data){
         if(data===0){
             //0 is quit, I will quit the election
             quitElection=true;
@@ -156,39 +199,32 @@ function registerListener(sendSocket) {
             console.log("election response error : "+data)
         }
         //console.log(totalAlive)
-        console.log('electionReponseNum from s2 '+electionReponseNum)
-        console.log("totalAlive from s2 "+totalAlive)
-        if(electionReponseNum===(totalAlive - 1)){
+        console.log('electionReponseNum from s0 '+electionReponseNum)
+        console.log("totalAlive from s0 "+totalAlive)
+        if(electionReponseNum===(totalAlive-1)){
             if(!quitElection){
                 //broadcast I am new leader!!!
                 console.log(id+" am the leader now")
-
+                master=id;
+                isMaster=true;
+                
                 for (let[key, value] of activeSocket){
-                    value.acti.emit("declareMaster",id)
+                   
+                    DB.sendLocalSQL(db, value.acti);
                 }
             }
         }
     });
+
+    sendSocket.on('sendSQL', function(data, filename){
+        DB.applyMasterSQL(db, data, filename);
+        console.log("Receive SQL file from master");
+    });
 }
 
-
-// //recv SQL file
-// socketWithS1.on('sendSQL', function (data, filename) {
-//     renewDB(data, filename);
-// })
-
-// socketWithS2.on('sendSQL', function (data, filename) {
-//     renewDB(data, filename);
-// })
-
-
-
-function sendLocalSql(){
-    // console.log(ioS0.sockets.in("serverRoom"));
-    ioS0.sockets.in("serverRoom").emit('hello',1);
-}
-
-function askMaster(response){
+function askMaster(response, socket){
+    console.log("recieve master response"+response);
+    console.log("Master is "+ master);
     if(response == -1 && master == -1){
         numNoMaster ++;
         console.log("numMa" + numNoMaster, "min req" + minServerRequire)
@@ -198,7 +234,9 @@ function askMaster(response){
             numNoMaster = 0;
             console.log("start leader election");
             for (let[key, value] of activeSocket){
-                startElection(value.acti, id, key);
+                if(value.acti === socket){
+                    startElection(value.acti, id, key);
+                }
             }
             // declareMaster=false;
 
@@ -206,6 +244,7 @@ function askMaster(response){
     }
     else if(response != -1){
         master = response;
+        console.log("master changed to ",master);
     }
 }
 
@@ -217,7 +256,7 @@ function startElection(socket, id, aimId){
 }
 
 function responseElection(socket,data){
-    console.log("s"+id+"responses election request to s"+data.id);
+    console.log("s"+id+" responses election request to s"+data.id);
     let targetId=data.id;
     let targetDBVersion=data.dbVersion;
 

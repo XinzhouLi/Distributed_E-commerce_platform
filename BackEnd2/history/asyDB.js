@@ -70,47 +70,24 @@ async function insertVersion(versionNum) {
     await db.run(query)
 }
 
-async function sendLocalSQL(dbName, socket) {
+async function dumpLocalSQL(serverName){
     //For example, serverName = server1.db extension name necessary
-    await exec("sqlite3 db/" + dbName + " .dump > db/master.sql");
-    await open("db/master.sql", "r", function (err, fd) {
-      if (err) {
-        console.log(err.message);
-        socket.emit("sendSQL", "fail1");
-      } else {
-        fs.stat("db/master.sql", function (err, stats) {
-          if (err) {
-            console.log(err);
-            socket.emit("sendSQL", "fail2");
-          } else {
-            //console.log(stats.size)
-            let buffer = new Buffer.alloc(stats.size);
-            fs.read(fd, buffer, 0, buffer.length, 0, function (err, bytes) {
-              console.log(fd);
-              socket.emit("sendSQL", buffer, "master.sql");
-            });
-          }
-        });
-      }
-    });
-  }
-  
-  async function applyMasterSQL(dbName, data, filename) {
-    //data, filename from socket 'sendsql'
+    await exec('sqlite3 ../db/' + serverName + ' .dump > ../db/master.sql');
+}
+
+async function applyMasterSQL(){
     let db = new dbFile.Database();
-    console.log(data);
-    await writeFile("db/" + filename, data);
-    await db.connect(dbName);
-    // later for increase the speed of process to make it to Promiss.all
-    await db.run("DROP TABLE IF EXISTS bed");
-    await db.run("DROP TABLE IF EXISTS chair");
-    await db.run("DROP TABLE IF EXISTS orderInfo");
-    await db.run("DROP TABLE IF EXISTS sofa");
-    await db.run("DROP TABLE IF EXISTS tables");
-    await db.run("DROP TABLE IF EXISTS version");
+    await db.connect();
+    // later for increase the speed of process to make it to Promiss.all 
+    await db.run('DROP TABLE IF EXISTS bed');
+    await db.run('DROP TABLE IF EXISTS chair');
+    await db.run('DROP TABLE IF EXISTS orderInfo');
+    await db.run('DROP TABLE IF EXISTS sofa');
+    await db.run('DROP TABLE IF EXISTS tables');
+    await db.run('DROP TABLE IF EXISTS version');
     await db.close();
-    await exec("sqlite3 db/" + dbName + " < db/master.sql");
-  }
+    await exec('sqlite3 db/server1.db < db/master.sql');
+}
 // getAllInfo("tables")
 // getInfoByID("bed", "bedId", "b01")
 // editItemQuantity('bed', 'bedId','b01','1')
