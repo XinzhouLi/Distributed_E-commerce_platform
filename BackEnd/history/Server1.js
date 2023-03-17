@@ -33,6 +33,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
 
     socket.on('requestSingleItem', function(data) {
         let Jobj = data;
+        console.log("Data is.......:   "+data.toString())
         let p = new Promise((resolve, reject) =>{
             resolve(getInfoByID(Jobj.tableName, Jobj.IdName, Jobj.Id));
             let l = setTimeout(()=>{
@@ -99,6 +100,9 @@ function getAllInfo(tableName) {
 //IdName example: bedId
 //Id example: b03
 function getInfoByID(tableName, IdName, Id) {
+    console.log(tableName);
+    console.log(IdName);
+    console.log(Id);
     var db = new sqlite3.Database(dbPath, (err, data) => {
         let ans = {stat: "", content: ""}
         if (!err) {

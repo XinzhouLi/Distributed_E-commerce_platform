@@ -31,6 +31,7 @@ ioWithFrontEnd.on('connection', function (socketWithFrontEnd) {
     startTaskDistributing();
     // data: itemID
     socketWithFrontEnd.on('requestSingleItem', function(data){
+        // console.log("Data in loadBalancer is:..."+data)
         taskQueue.push("requestSingleItem");
         reqestSingleItem = data;
         // wait for 2 sec to let server complish task

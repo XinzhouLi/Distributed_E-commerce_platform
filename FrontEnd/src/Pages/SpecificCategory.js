@@ -26,7 +26,11 @@ function SpecificCategory() {
   const[obj3ID,setObj3ID] = useState(null);
   const[obj4ID,setObj4ID] = useState(null);
     
+  let time = 0;
   useEffect(() => {
+    console.log(time)
+    time++;
+    console.log(obj1Name)
     socket.emit("requestAllCateInfo", { "tableName":cateName })
     socket.on("responseAllCateInfo", function (data) {
         let socketData = JSON.parse(data)
@@ -34,25 +38,25 @@ function SpecificCategory() {
         setObj2Name(socketData.content[1].itemName)
         setObj3Name(socketData.content[2].itemName)
         setObj4Name(socketData.content[3].itemName)
-        setObj1ID(socketData.content[0].itemID)
-        setObj2ID(socketData.content[1].itemID)
-        setObj3ID(socketData.content[2].itemID)
-        setObj4ID(socketData.content[3].itemID)
+        setObj1ID(socketData.content[0].itemId)
+        setObj2ID(socketData.content[1].itemId)
+        setObj3ID(socketData.content[2].itemId)
+        setObj4ID(socketData.content[3].itemId)
     })
-  })
+  },[obj1Name,obj2Name,obj3Name,obj4Name,obj1ID,obj2ID,obj3ID,obj4ID])
 
   function handleBtnClick(e){
     if(e.target.id === 'obj1'){
-        navigate('/Item?'+"cateName="+cateName.toString()+"&itemName="+obj1Name+"&itemID="+obj1ID);
+        navigate('/Item?'+"cateName="+cateName.toString()+"&itemName="+obj1Name+"&itemId="+obj1ID);
     }
     else if(e.target.id === 'obj2'){
-        navigate('/Item?'+"cateName="+cateName.toString()+"&itemName="+obj2Name+"&itemID="+obj2ID);
+        navigate('/Item?'+"cateName="+cateName.toString()+"&itemName="+obj2Name+"&itemId="+obj2ID);
     }
     else if(e.target.id === 'obj3'){
-        navigate('/Item?'+"cateName="+cateName.toString()+"&itemName="+obj3Name+"&itemID="+obj3ID);
+        navigate('/Item?'+"cateName="+cateName.toString()+"&itemName="+obj3Name+"&itemId="+obj3ID);
     }
     else if(e.target.id === 'obj4'){
-        navigate('/Item?'+"cateName="+cateName.toString()+"&itemName="+obj4Name+"&itemID="+obj4ID);
+        navigate('/Item?'+"cateName="+cateName.toString()+"&itemName="+obj4Name+"&itemId="+obj4ID);
     }
     else{
         console.log('Error in redirecting')

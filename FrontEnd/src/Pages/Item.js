@@ -2,15 +2,35 @@ import React, { useEffect, useState} from 'react';
 import { useNavigate, createSearchParams } from 'react-router-dom';
 import {Container, Button, Card, Form, Row, Col} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import socketConfig from '../socketConfig.js';
 
 function Item() {
+
+  const [socket, setSocket] = useState(socketConfig, {
+		reconnection: true
+	});
 
   const navigate = useNavigate()
   const [quantity,setQuantity] = React.useState(0)
   const queryParam = new URLSearchParams(window.location.search)
   const cateName = queryParam.get("cateName")
   const itemName = queryParam.get("itemName")
+  const itemId = queryParam.get("itemId")
   const imageURL = "https://source.unsplash.com/random/50×50/?"+cateName.toString()
+  let time = 0;
+
+  useEffect(()=>{
+    console.log(time)
+    time+=1;
+    console.log(cateName)
+    console.log(itemName)
+    console.log(itemId)
+    socket.emit("requestSingleItem", { "tableName":cateName , "IdName": itemName , "Id" : itemId})
+    socket.on("responseSingleItemInfo", function (data) {
+        let socketData = JSON.parse(data)
+        console.log(socketData)
+    })
+  },[cateName,itemName,itemId])
 
 
   const handleMinusBtn = () =>{
