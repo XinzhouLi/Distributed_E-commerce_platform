@@ -1,6 +1,6 @@
 import React, { useEffect, useState} from 'react';
 import { useNavigate, createSearchParams } from 'react-router-dom';
-import {Container, Button, Card, Form, Row, Col} from 'react-bootstrap'
+import {Container, Button, Card, Form, Row, Col,Modal, ModalBody, ModalHeader, ModalFooter,ModalTitle, Alert} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import socketConfig from '../socketConfig.js';
 
@@ -11,40 +11,54 @@ function Item() {
 	});
 
   const navigate = useNavigate()
-  const [quantity,setQuantity] = React.useState(0)
   const queryParam = new URLSearchParams(window.location.search)
   const cateName = queryParam.get("cateName")
   const itemName = queryParam.get("itemName")
   const itemId = queryParam.get("itemId")
   const imageURL = "https://source.unsplash.com/random/50×50/?"+cateName.toString()
-  let time = 0;
+
+  const [description,setDescription] = useState(null) 
+  const [quantity,setQuantity] = React.useState(0)
+  const [quantityToBuy,setQuantityToBuy] = React.useState(1)
+
+
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+
 
   useEffect(()=>{
-    console.log(time)
-    time+=1;
-    console.log(cateName)
-    console.log(itemName)
-    console.log(itemId)
-    socket.emit("requestSingleItem", { "tableName":cateName , "IdName": itemName , "Id" : itemId})
+    socket.emit("requestSingleItem", { "tableName":cateName , "idName": "itemId" , "id" : itemId})
+    console.log("sent:")
+    console.log(cateName+"itemId"+itemId)
     socket.on("responseSingleItemInfo", function (data) {
         let socketData = JSON.parse(data)
+        console.log("socketData is below")
         console.log(socketData)
-    })
-  },[cateName,itemName,itemId])
+        setDescription(socketData.content.description)
+        setQuantity(socketData.content.quantity)
+        console.log(description)
+    })  
+  },[cateName,itemName,itemId,description])
 
 
   const handleMinusBtn = () =>{
-    if(quantity>1){
-      setQuantity(quantity-1);
+    if(quantityToBuy>1){
+      setQuantityToBuy(quantityToBuy-1);
     }
   }
 
   const handlePlusBtn = () =>{
-    setQuantity(quantity+1);
+    setQuantityToBuy(quantityToBuy+1);
   }
 
   const handleBuyBtn = () =>{
-    navigate('/Payment')
+    if(quantityToBuy<=quantity){
+      navigate('/Payment'+"?cateName="+cateName.toString()+"&itemName="+itemName+"&itemId="+itemId+"&quantityToBuy="+quantityToBuy)
+    }
+    else{
+      console.log("Exceed quantity")
+      setShow(true)
+    }
   }
 
   return (
@@ -64,17 +78,17 @@ function Item() {
           <Card.Img src = {imageURL} />
           <Card.Body>
             <Card.Title>
-              Card Example
+              {itemName}
             </Card.Title>
             <Card.Text>
-              Something
+              {description}
             </Card.Text>
             <Row>
               <Col>
                 <button type="button" className="btn btn-primary btn-lg" onClick={()=>handleMinusBtn()}>-</button>
               </Col>
               <Col>
-                {quantity}
+                {quantityToBuy}
               </Col>
               <Col>
                 <button type="button" className="btn btn-primary btn-lg" onClick={()=>handlePlusBtn()}>+</button>
@@ -86,6 +100,18 @@ function Item() {
           </Card.Body>
         </Card>
         </Container>
+
+        <Modal show={show} onHide={handleClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Warning</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>Woohoo, Items exceed quantity! We only have {quantity} in stock! </Modal.Body>
+            <Modal.Footer>
+              <Button variant="primary" onClick={handleClose}>
+                OK
+              </Button>
+            </Modal.Footer>
+          </Modal>
       </header>
     </div>
   );
