@@ -117,8 +117,9 @@ ioS1.on('connect', async function(socket){
     });
 
     socket.on('declareMaster',(data)=>{
-        master = data
-        console.log("Master changed to "+master)
+        master = data;
+        quitElection = false;
+        console.log("Master changed to "+master);
     })
 
     socket.on('sendSQL', function(data, filename){
@@ -175,7 +176,8 @@ function registerListener(sendSocket) {
             //0 is quit, I will quit the election
             quitElection=true;
             electionReponseNum++;
-        }else if(data ==1){
+        // quitElection != true avoid the late response changes the result
+        }else if(data ==1 && quitElection != true){
             quitElection = false;
             electionReponseNum++;
         }else{
@@ -183,8 +185,8 @@ function registerListener(sendSocket) {
             //error should only be 1 or 0
             console.log("election response error : "+data)
         }
-        console.log('electionReponseNum from s1 '+electionReponseNum)
-        console.log("totalAlive from s1 "+totalAlive)
+        console.log('electionReponseNum from s1 '+electionReponseNum + ': ' +data);
+        //console.log("totalAlive from s1 "+totalAlive)
         if(electionReponseNum===(totalAlive-1)){
                 if(!quitElection){
                 //broadcast I am new leader!!!
@@ -215,14 +217,14 @@ function askMaster(response,socket){
         numNoMaster ++;
         // more than half servers have no master
         console.log("numMa " + numNoMaster, "min req " + minServerRequire)
-        if(numNoMaster>=minServerRequire){
+        if(numNoMaster>minServerRequire){
             // start leader election
             numNoMaster = 0;
             console.log("start leader election");
             for (let[key, value] of activeSocket){
-                if(value.acti === socket){
+                // if(value.acti === socket){
                     startElection(value.acti, id, key);
-                }      
+                // }      
             }
             // declareMaster=false;
 

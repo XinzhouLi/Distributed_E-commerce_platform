@@ -25,6 +25,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
 
     socket.on('requestSingleItem', async function (data) {
         let input = data
+
         console.log('Server0: Send in Query')
         let result = await DB.getInfoByID(input.tableName, input.idName, input.id)
         socket.emit('responseSingleItemInfo', result)
@@ -132,8 +133,9 @@ ioS0.on('connect', async function(socket){
 
     socket.on('declareMaster',(data)=>{
         console.log("receive declare master from server"+data);
-        master = data
-        console.log("Master changed to "+master)
+        master = data;
+        quitElection = false;
+        console.log("Master changed to "+master);
     })
 
     socket.on('sendSQL', function(data, filename){
@@ -190,7 +192,7 @@ function registerListener(sendSocket) {
             //0 is quit, I will quit the election
             quitElection=true;
             electionReponseNum++;
-        }else if(data ==1){
+        }else if(data ==1 && quitElection != true){
             quitElection = false;
             electionReponseNum++;
         }else{
@@ -229,14 +231,14 @@ function askMaster(response, socket){
         numNoMaster ++;
         console.log("numMa" + numNoMaster, "min req" + minServerRequire)
         // more than half servers have no master
-        if(numNoMaster>=minServerRequire){
+        if(numNoMaster>minServerRequire){
             // start leader election
             numNoMaster = 0;
             console.log("start leader election");
             for (let[key, value] of activeSocket){
-                if(value.acti === socket){
+                // if(value.acti === socket){
                     startElection(value.acti, id, key);
-                }
+                // }
             }
             // declareMaster=false;
 

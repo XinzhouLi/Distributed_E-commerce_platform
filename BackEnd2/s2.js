@@ -113,7 +113,8 @@ ioS2.on('connect', async function(socket){
     });
 
     socket.on('declareMaster',(data)=>{
-        master = data
+        master = data;
+        quitElection = false;
         console.log("Master changed to "+master)
     })
 
@@ -161,7 +162,7 @@ function registerListener(sendSocket) {
             //0 is quit, I will quit the election
             quitElection=true;
             electionReponseNum++;
-        }else if(data ==1){
+        }else if(data ==1 && quitElection != true){
             quitElection = false;
             electionReponseNum++;
         }else{
@@ -216,14 +217,14 @@ function askMaster(response, socket){
         numNoMaster ++;
         console.log("numMa" + numNoMaster, "min req" + minServerRequire)
         // more than half servers have no master
-        if(numNoMaster>=minServerRequire){
+        if(numNoMaster>minServerRequire){
             // start leader election
             numNoMaster = 0;
             console.log("start leader election");
             for (let[key, value] of activeSocket){
-                if(value.acti === socket){
+                // if(value.acti === socket){
                     startElection(value.acti, id, key);
-                }
+                // }
             }
             // declareMaster=false;
 

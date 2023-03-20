@@ -67,6 +67,7 @@ var serverNumList = new Array();
 //         totalNumServer--;
 //         console.log("------A  "+thisServerA);
 //         serverList.splice(thisServerA - 1, 1);
+
 //         console.log("Server " + thisServerA + " was deleted");
 //         //thisServerT--;
 //         checkThisServer(socketWithSA);
