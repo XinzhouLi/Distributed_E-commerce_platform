@@ -1,5 +1,4 @@
 const DB = require('./asyDB')
-const eventEmiter = require("events")
 
 let totalServer=3;
 
@@ -19,15 +18,6 @@ let master = -1;
 let numNoMaster =0;
 let activeSocket = new Map();
 let db = "db0.db";
-
-//init variables for consistency
-let localAvailable = true;
-let globalAvailable = true;
-let whoHold = -1;
-const waitingList = [];
-let ifSendToken=true;
-
-
 
 const ioWithLoadBalancer = require('socket.io')(5101);
 ioWithLoadBalancer.on('connection', function (socket) {
@@ -53,7 +43,6 @@ ioWithLoadBalancer.on('connection', function (socket) {
 
     socket.on('addOrder', async function (data) {
         let input = data;
-
         console.log('Server0: Send in Query')
         let result
         try {
@@ -71,24 +60,6 @@ ioWithLoadBalancer.on('connection', function (socket) {
     });
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // make connection with Server 1: port 6000
 let activeIo = require('socket.io-client');
@@ -135,19 +106,22 @@ ioS0.on('connect', async function(socket){
                 }
             }
         }
-
-
-        if (whoHold == -1){
-            for(let[key, value] of activeSocket){
-                if (value.react === socket){
-                    value.acti.emit("requestTokenInfo")
-                    console.log(id + " request current token info")
-                }
-            }
-        }
-
-
     }, 5000);
+    // //send sql file to all Servers
+    // if(isMaster){
+    //     console.log("s0 is master");
+    //     sendLocalSql();
+    // }else if(totalAlive >= 3) {
+    //     console.log("start checking ")
+    //     // for (let[key, value] of activeSocket){
+    //     //     if(value.acti === socket){
+    //     //         value.acti.emit('requestMaster');
+    //     //     }
+    //     // }
+    //     socketWithS1.emit('requestMaster');
+    //     socketWithS2.emit('requestMaster');
+    // }
+
     //Listen for request master
     socket.on('requestMaster', function(){
         socket.emit('responseMaster',master);
@@ -169,13 +143,6 @@ ioS0.on('connect', async function(socket){
         console.log("Receive SQL file from master");
     });
 
-
-    socket.on('setToken', (data)=>{
-        whoHold = data;
-        console.log(id + " has the token now")
-    })
-
-
     socket.on('disconnect', ()=>{
         totalAlive --;
         console.log("disconnect, remaining alive: ", totalAlive);
@@ -184,71 +151,31 @@ ioS0.on('connect', async function(socket){
         for (let[key, value] of activeSocket){
             if(value.react === socket){
                 offServer = key;
-
                 activeSocket.delete(key);
             }
         }
 
-
-        // if(offServer == master) {
-        //
-        //     console.log("Master failed, start leader election");
-        //     electionReponseNum = 0;
-        //     for (let[key, value] of activeSocket){
-        //         startElection(value.acti, id, key);
-        //     }
-        // }
-
         if(offServer == master) {
-            if(offServer == whoHold) {
-                console.log("Master failed, start leader election");
-                electionReponseNum = 0;
-                for (let[key, value] of activeSocket){
-                    startElection(value.acti, id, key);
-                }
-            }else {
-                ifSendToken = false;
-                console.log("Master failed, start leader election");
-                electionReponseNum = 0;
-                for (let [key, value] of activeSocket) {
-                    startElection(value.acti, id, key);
-                }
-            }
-        }else{
-            if(offServer == whoHold){
-                whoHold = master;
-                globalAvailable = true
-            }else{
-                //do nothing
+            console.log("Master failed, start leader election");
+            electionReponseNum = 0;
+            for (let[key, value] of activeSocket){
+                startElection(value.acti, id, key);
             }
         }
+        
     });
 
 
-    socket.on("requestTokenInfo", ()=>{
-        socket.emit("responseTokenInfo",whoHold, globalAvailable)
-        console.log("Token Info has been sent out")
-    })
+    //recv SQL file
+    // socketWithS1.on('sendSQL', function (data, filename) {
+    //     renewDB(data, filename);
+    // })
+    //
+    // socketWithS2.on('sendSQL', function (data, filename) {
+    //     renewDB(data, filename);
+    // })
 
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //都可以被直接拷贝
@@ -274,8 +201,8 @@ function registerListener(sendSocket) {
             console.log("election response error : "+data)
         }
         //console.log(totalAlive)
-        console.log('electionReponseNum from s'+id+" "+electionReponseNum)
-        console.log("totalAlive from s"+id+" "+totalAlive)
+        console.log('electionReponseNum from s0 '+electionReponseNum)
+        console.log("totalAlive from s0 "+totalAlive)
         if(electionReponseNum===(totalAlive-1)){
             if(!quitElection){
                 //broadcast I am new leader!!!
@@ -284,15 +211,8 @@ function registerListener(sendSocket) {
                 isMaster=true;
                 
                 for (let[key, value] of activeSocket){
-                    value.acti.emit("declareMaster",id)
-                    if (ifSendToken){
-                        value.acti.emit("setToken", id)
-                        whoHold = id
-                        globalAvailable = true
-                        localAvailable = true
-                    }
-                    ifSendToken=true;
-                    await DB.sendLocalSQL(db, value.acti);
+                   
+                    DB.sendLocalSQL(db, value.acti);
                 }
             }
         }
@@ -302,38 +222,7 @@ function registerListener(sendSocket) {
         DB.applyMasterSQL(db, data, filename);
         console.log("Receive SQL file from master");
     });
-
-    sendSocket.on("responseTokenInfo",(data1, data2)=>{
-        if(data1 != -1){
-            whoHold = data1
-            globalAvailable = data2
-            console.log("Who hold: "+data1 + " status: "+ data2)
-        }
-
-    })
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function askMaster(response, socket){
     console.log("recieve master response is"+response);
