@@ -19,6 +19,13 @@ let numNoMaster =0;
 let activeSocket = new Map();
 let db = "db2.db";
 
+//init variables for consistency
+let localAvailable = true;
+let globalAvailable = true;
+let whoHold = -1;
+const waitingList = [];
+let ifSendToken=true;
+
 const ioWithLoadBalancer = require('socket.io')(5300);
 ioWithLoadBalancer.on('connection', function (socket) {
     console.log('Server 2: connected with Load Balancer:', socket.client.id);
@@ -101,6 +108,16 @@ ioS2.on('connect', async function(socket){
             }
 
         }
+
+         // intialize token 
+        if (whoHold == -1){
+            for(let[key, value] of activeSocket){
+                if (value.react === socket){
+                    value.acti.emit("requestTokenInfo")
+                    console.log("server "+id + " request current token info")
+                }
+            }
+        }
     }, 5000);
   
     //Listen for request master
@@ -123,6 +140,12 @@ ioS2.on('connect', async function(socket){
         console.log("Receive SQL file from master");
     });
 
+    socket.on('setToken', (data)=>{
+        whoHold = data;
+        ifSendToken=true;
+        console.log("server "+id + " set token belongs to server"+data+" now");
+    })
+
     socket.on('disconnect', ()=>{
         totalAlive --;
         console.log("disconnect, remaining alive: ", totalAlive);
@@ -135,15 +158,46 @@ ioS2.on('connect', async function(socket){
             }
         }
 
+        // if(offServer == master) {
+        //     console.log("Master failed, start leader election");
+        //     electionReponseNum = 0;
+        //     for (let[key, value] of activeSocket){
+        //         startElection(value.acti, id, key);
+        //     }
+        // }
+
         if(offServer == master) {
-            console.log("Master failed, start leader election");
-            electionReponseNum = 0;
-            for (let[key, value] of activeSocket){
-                startElection(value.acti, id, key);
+            if(offServer == whoHold) {
+                console.log("Master and token failed, start leader election and reset token");
+                electionReponseNum = 0;
+                for (let[key, value] of activeSocket){
+                    startElection(value.acti, id, key);
+                }
+            }else {
+                ifSendToken = false;
+                console.log("Only Master failed, start leader election without reset token");
+                electionReponseNum = 0;
+                for (let [key, value] of activeSocket) {
+                    startElection(value.acti, id, key);
+                }
+            }
+        }else{
+            if(offServer == whoHold){
+                console.log("only token failed, reset token to master")
+                whoHold = master;
+                globalAvailable = true
+            }else{
+                console.log("the failed server is not master and not hold token, do nothing")
+                //do nothing
             }
         }
         
     });
+    //tell the asking server who hold the token
+    socket.on("requestTokenInfo", ()=>{
+        socket.emit("responseTokenInfo",whoHold, globalAvailable)
+        console.log("Token Info has been sent out")
+    })
 
 });
 
@@ -171,7 +225,7 @@ function registerListener(sendSocket) {
             console.log("election response error : "+data)
         }
         //console.log(totalAlive)
-        console.log('electionReponseNum from s2 '+electionReponseNum)
+        console.log('electionReponseNum from s2 '+electionReponseNum+"vote is : "+data)
         console.log("totalAlive from s2 "+totalAlive)
         if(electionReponseNum===(totalAlive - 1)){
             if(!quitElection){
@@ -179,13 +233,21 @@ function registerListener(sendSocket) {
                 console.log(id+" am the leader now")
                 master=id;
                 isMaster=true;
-                //console.log(activeSocket);
-                console.log("the size of activeSocket is :"+activeSocket.size)
+                console.log("Let me check that how many server should I send to from following map")
+                console.log(activeSocket)
                 for (let[key, value] of activeSocket){
-                    console.log("I am  here in declare function");
+                    console.log("Server "+id+" declared he will become to new master to all the server")
                     value.acti.emit("declareMaster",id)
+                    if (ifSendToken){
+                        console.log("Server "+id+" ask all the server reset token info to him")
+                        value.acti.emit("setToken", id)
+                        whoHold = id
+                        globalAvailable = true
+                        localAvailable = true
+                    }
                     DB.sendLocalSQL(db, value.acti);
                 }
+                ifSendToken=true;
             }
         }
     });
@@ -193,6 +255,16 @@ function registerListener(sendSocket) {
         DB.applyMasterSQL(db, data, filename);
         console.log("Receive SQL file from master");
     });
+
+    //set my tokeninfo from other servers' response
+    sendSocket.on("responseTokenInfo",(data1, data2)=>{
+        if(data1 != -1){
+            whoHold = data1
+            globalAvailable = data2
+            console.log("Now I set, Who hold: "+data1 + " status: "+ data2)
+        }
+
+    })
 }
 
 
