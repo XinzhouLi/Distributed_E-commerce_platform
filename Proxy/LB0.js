@@ -3,6 +3,7 @@ const ioWithFrontEnd = require('socket.io')(3012, {
         origin: '*',
     }
 });
+
 var totalNumServer = 0;
 var currentServer = 1;
 var thisServer1 = 0;
@@ -84,7 +85,19 @@ var serverNumList = new Array();
 //     })
 // });
 
+const ioWithLb1 = require('socket.io')(3000, {
+    cors: {
+        origin: '*',
+    }
+});
 
+ioWithLb1.on("connection", function (socketWithLb1) {
+    console.log("LB1 connected");
+    socketWithLb1.emit("helloMessage","Hello I'm LB0");
+    socketWithLb1.on("helloMessage", (data) => {
+        console.log(data);
+    })
+})
 
 // make connection with server 1: port 5101
 var ioWithServer1 = require('socket.io-client');
