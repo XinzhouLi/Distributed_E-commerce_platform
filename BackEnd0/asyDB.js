@@ -79,11 +79,19 @@ async function insertOrder(OrderData) {
   await db.run(query);
 }
 
-async function insertVersion(versionNum) {
+async function editVersion(versionNum) {
   let db = new dbFile.Database();
   await db.connect();
-  let query = "INSERT INTO version(versionNum) values(" + versionNum + ")";
-  await db.run(query);
+  let query = 'UPDATE "version" SET versionNum = ? WHERE "id" = 1';
+  await db.run(query, versionNum);
+}
+
+async function getVersion() {
+  let db = new dbFile.Database();
+  await db.connect();
+  let query = "SELECT versionNum FROM version WHERE id = 1";
+  let result = await db.get(query)
+  return result;
 }
 
 async function sendLocalSQL(dbName, socket) {
@@ -127,13 +135,12 @@ async function applyMasterSQL(dbName, data, filename) {
   await db.close();
   await exec("sqlite3 db/" + dbName + " < db/master.sql");
 }
-// getAllInfo("tables")
 // getInfoByID("bed", "bedId", "b01")
 // editItemQuantity('bed', 'bedId','b01','1')
 // insertOrder('"ABDC","chao","188 harvest rose","4563888855742057","05/16","826","Table66"')
-// insertVersion(10)
-
-exports.insertVersion = insertVersion;
+// console.log(await getVersion())
+exports.getVersion = getVersion;
+exports.editVersion = editVersion;
 exports.getAllInfo = getAllInfo;
 exports.getInfoByID = getInfoByID;
 exports.editItemQuantity = editItemQuantity;
