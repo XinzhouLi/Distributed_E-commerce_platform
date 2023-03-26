@@ -17,7 +17,7 @@ let master = -1;
 
 let numNoMaster =0;
 let activeSocket = new Map();
-let db = "db2.db";
+let db = "db1.db";
 
 //init variables for consistency
 let localAvailable = true;
