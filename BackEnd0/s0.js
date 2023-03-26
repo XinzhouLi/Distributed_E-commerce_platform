@@ -1,9 +1,6 @@
 const DB = require('./asyDB')
-
 let totalServer=3;
-
-let minServerRequire=parseInt((totalServer/2));
-
+let minServerRequire=parseInt(totalServer/2);
 // Multiple server communication:
 //parameters for election
 let quitElection = false;
@@ -41,10 +38,10 @@ let socketWithS2 = activeIo.connect("http://localhost:7100/", {
     reconnection: true
 });
 registerListener(socketWithS2);
+
+
+
 const ioS0 = require('socket.io')(5100);
-
-
-
 ioWithLoadBalancer.on('connection', function (socket) {
     console.log('Server '+id+': connected with Load Balancer:', socket.client.id);
 
