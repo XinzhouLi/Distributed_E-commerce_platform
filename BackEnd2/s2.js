@@ -17,7 +17,7 @@ let master = -1;
 
 let numNoMaster =0;
 let activeSocket = new Map();
-let db = "db1.db";
+let db = "db2.db";
 
 //init variables for consistency
 let localAvailable = true;
@@ -25,47 +25,6 @@ let globalAvailable = true;
 let whoHold = -1;
 const waitingList = [];
 let ifSendToken=true;
-
-const ioWithLoadBalancer = require('socket.io')(5300);
-ioWithLoadBalancer.on('connection', function (socket) {
-    console.log('Server 2: connected with Load Balancer:', socket.client.id);
-
-    socket.on('requestSingleItem', async function (data) {
-        let input = data
-        console.log('Server2: Send in Query')
-        let result = await DB.getInfoByID(input.tableName, input.idName, input.id)
-        socket.emit('responseSingleItemInfo', result)
-        console.log("Server2: Send back", result)
-    });
-
-    socket.on('requestAllCateInfo', async function (data) {
-        let input = data
-        console.log('Server2: Send in Query')
-        let result = await DB.getAllInfo(input.tableName)
-        socket.emit('responseAllCateInfo', result)
-        console.log("Server2: Send back", result)
-    });
-
-    socket.on('addOrder', async function (data) {
-        let input = data
-        console.log('Server2: Send in Query')
-        let result
-        try {
-            await DB.editItemQuantity(input.tableName, input.idName, input.id, input.quantityToBuy)
-            await DB.insertOrder(input.insertOrderData)
-            await DB.insertVersion()
-        } catch (e) {
-            result = JSON.stringify({status: 0, content: e.message})
-            socket.emit('responseUserOrderStatus', result)
-        }
-        result = JSON.stringify({status: 1, content: "Order successfully placed"})
-        socket.emit('responseUserOrderStatus', result)
-
-        console.log("Server2: Send back", result)
-    });
-
-});
-
 // make connection with Server 1: port 6000
 let activeIo = require('socket.io-client');
 let socketWithS0 = activeIo.connect("http://localhost:5100/", {
@@ -79,47 +38,59 @@ let socketWithS1 = activeIo.connect("http://localhost:6100/", {
 registerListener(socketWithS1);
 
 const ioS2 = require('socket.io')(7100);
+const ioWithLoadBalancer = require('socket.io')(5300);
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//下面都是可以被复制的
+//用了更多的三目运算来优化了之前老要调添加对应的socket到map中
+
 ioS2.on('connect', async function(socket){
+    dbVersion = await DB.getVersion();
     totalAlive ++;
     console.log("Current alive: ", totalAlive);
-    socket.join("serverRoom");
     socket.emit('who')
-    socket.on('iam', (data)=>{
-        console.log(id, "connected with "+ data)
-        activeSocket.set(data, {react :socket,  acti: data === 0 ? socketWithS0 : socketWithS1});
-        //console.log(activeSocket);
+    socket.on('iam', async (data) => {
+        console.log("Server " +id, "connected with " + "Server "+ data)
+        activeSocket.set(data, {react: socket, acti: data === 0 ? socketWithS0 : (data === 1 ? socketWithS1 : socketWithS2)})
     })
     if(isMaster){
-        console.log("S1 SQL file sent to slave");
+        console.log("Server "+id+" SQL file sent to slaves");
         await DB.sendLocalSQL(db, socket);
     }
 
-    //都是可以被复制的
-    let t0 =setTimeout(()=>{
+
+    //预留三秒时间 等待连接并存储socket的信息，否则会出现回调问题
+    let t0 = setTimeout(()=>{
         if(isMaster){
-            console.log("s2 is master");
-        }else if(totalAlive >= 3) {
-            //console.log(activeSocket);
-            console.log("start checking ")
+            console.log("Server "+id+ "  is master");
+        }
+        else if(totalAlive == totalServer) {
             for (let[key, value] of activeSocket){
                 if(value.react === socket){
                     value.acti.emit('requestMaster');
                 }
             }
-
+            console.log("Server "+id + " request current Master info")
         }
-
-         // intialize token 
+        // intialize token
         if (whoHold == -1){
             for(let[key, value] of activeSocket){
                 if (value.react === socket){
                     value.acti.emit("requestTokenInfo")
-                    console.log("server "+id + " request current token info")
+                    console.log("Server "+id + " request current token info")
                 }
             }
         }
     }, 5000);
-  
+
     //Listen for request master
     socket.on('requestMaster', function(){
         socket.emit('responseMaster',master);
@@ -132,23 +103,22 @@ ioS2.on('connect', async function(socket){
     socket.on('declareMaster',(data)=>{
         master = data;
         quitElection = false;
-        console.log("Master changed to "+master)
+        console.log("Master changed to Server "+master);
     })
 
     socket.on('sendSQL', function(data, filename){
         DB.applyMasterSQL(db, data, filename);
-        console.log("Receive SQL file from master");
+        console.log("Received SQL file from master");
     });
-
     socket.on('setToken', (data)=>{
         whoHold = data;
         ifSendToken=true;
-        console.log("server "+id + " set token belongs to server"+data+" now");
+        console.log("Token initialize to hold by Server "+ data);
     })
 
     socket.on('disconnect', ()=>{
         totalAlive --;
-        console.log("disconnect, remaining alive: ", totalAlive);
+        console.log("Remaining alive: ", totalAlive);
         let offServer;
         // delete off server info
         for (let[key, value] of activeSocket){
@@ -158,17 +128,10 @@ ioS2.on('connect', async function(socket){
             }
         }
 
-        // if(offServer == master) {
-        //     console.log("Master failed, start leader election");
-        //     electionReponseNum = 0;
-        //     for (let[key, value] of activeSocket){
-        //         startElection(value.acti, id, key);
-        //     }
-        // }
 
         if(offServer == master) {
             if(offServer == whoHold) {
-                console.log("Master and token failed, start leader election and reset token");
+                console.log("Master with token failed, start leader election and reset token");
                 electionReponseNum = 0;
                 for (let[key, value] of activeSocket){
                     startElection(value.acti, id, key);
@@ -183,63 +146,87 @@ ioS2.on('connect', async function(socket){
             }
         }else{
             if(offServer == whoHold){
-                console.log("only token failed, reset token to master")
+                console.log("only token failed, reset token to Master")
                 whoHold = master;
                 globalAvailable = true
-            }else{
-                console.log("the failed server is not master and not hold token, do nothing")
-                //do nothing
             }
+            // else{
+            //     console.log("the failed server is not master and not hold token, do nothing")
+            // }
         }
-        
+
     });
     //tell the asking server who hold the token
     socket.on("requestTokenInfo", ()=>{
         socket.emit("responseTokenInfo",whoHold, globalAvailable)
-        console.log("Token Info has been sent out")
+        // console.log("Token Info has been sent out")
     })
 
+    socket.on('writeOrder', async (data)=> {
+        console.log("Received a writing order request")
+        await DB.editItemQuantity(data.tableName, data.idName, data.id, data.quantityToBuy)
+        await DB.insertOrder(data.insertOrderData)
+        dbVersion++
+        await DB.editVersion(dbVersion)
+        socket.emit("completeWriteOrder")
+    })
+    socket.on("releaseToken",()=>{
+        console.log("Token has been released")
+        globalAvailable = true
+    })
+    socket.on("requestToken",(data)=>{
+        if (whoHold == id && globalAvailable){
+            whoHold = data
+            globalAvailable = false
+            for (let[key, value] of activeSocket){
+                value.acti.emit("TokenHolderChanged", whoHold, globalAvailable)
+            }
+            console.log("Server "+data+" now holds token")
+        }
+
+    })
+    socket.on("TokenHolderChanged", (newHolderID, gStatus) => {
+        console.log("Server "+newHolderID+" now holds token, try wakeup all the local thread")
+        whoHold = newHolderID
+        globalAvailable = gStatus
+        emitter.emit("wakeup")
+    })
 });
 
 
 //都可以被直接拷贝
-function registerListener(sendSocket) {
+async function registerListener(sendSocket) {
 
-    sendSocket.on('responseMaster', function(response){
-        askMaster(response,sendSocket);
+    sendSocket.on('responseMaster', function (response) {
+        askMaster(response, sendSocket);
     });
-    sendSocket.on('who', ()=>{
-        sendSocket.emit('iam',id);
+    sendSocket.on('who', () => {
+        sendSocket.emit('iam', id);
     })
-    sendSocket.on('responseElection', async function(data){
-        if(data===0){
+    sendSocket.on('responseElection', async function (data) {
+        if (data === 0) {
             //0 is quit, I will quit the election
-            quitElection=true;
+            quitElection = true;
             electionReponseNum++;
-        }else if(data ==1 && quitElection != true){
+        } else if (data == 1 && quitElection != true) {
             quitElection = false;
             electionReponseNum++;
-        }else{
+        } else {
             //error should only be 1 or 0
             quitElection = false;
-            console.log("election response error : "+data)
+            console.log("election response error : " + data)
         }
-        //console.log(totalAlive)
-        console.log('electionReponseNum from s2 '+electionReponseNum+"vote is : "+data)
-        console.log("totalAlive from s2 "+totalAlive)
-        if(electionReponseNum===(totalAlive - 1)){
-            if(!quitElection){
+        // console.log('electionReponseNum from s0 ' + electionReponseNum + " vote is:" + data)
+        if (electionReponseNum === (totalAlive - 1)) {
+            if (!quitElection) {
                 //broadcast I am new leader!!!
-                console.log(id+" am the leader now")
-                master=id;
-                isMaster=true;
-                console.log("Let me check that how many server should I send to from following map")
-                console.log(activeSocket)
-                for (let[key, value] of activeSocket){
-                    console.log("Server "+id+" declared he will become to new master to all the server")
-                    value.acti.emit("declareMaster",id)
-                    if (ifSendToken){
-                        console.log("Server "+id+" ask all the server reset token info to him")
+                console.log("Server " + id + " is the leader now")
+                master = id;
+                isMaster = true;
+
+                for (let [key, value] of activeSocket) {
+                    value.acti.emit("declareMaster", id)
+                    if (ifSendToken) {
                         value.acti.emit("setToken", id)
                         whoHold = id
                         globalAvailable = true
@@ -247,55 +234,65 @@ function registerListener(sendSocket) {
                     }
                     DB.sendLocalSQL(db, value.acti);
                 }
-                ifSendToken=true;
+                ifSendToken = true;
             }
         }
     });
-    sendSocket.on('sendSQL', function(data, filename){
-        DB.applyMasterSQL(db, data, filename);
-        console.log("Receive SQL file from master");
+
+    sendSocket.on('sendSQL', async function (data, filename) {
+        await DB.applyMasterSQL(db, data, filename);
+        let temp = await DB.getVersion()
+        dbVersion = temp[0][versionNum]
+        console.log("Receive SQL file from Master");
     });
 
     //set my tokeninfo from other servers' response
-    sendSocket.on("responseTokenInfo",(data1, data2)=>{
-        if(data1 != -1){
+    sendSocket.on("responseTokenInfo", (data1, data2) => {
+        if (data1 != -1) {
             whoHold = data1
             globalAvailable = data2
-            console.log("Now I set, Who hold: "+data1 + " status: "+ data2)
+            console.log("Init token, hold by Server " + data1)
         }
 
     })
-}
+    sendSocket.on("completeWriteOrder", (data) => {
+        numCompleteWriteOrder++
+        if (numCompleteWriteOrder == (totalAlive - 1)) {
+            waitingList.shift()
+            if (waitingList.length == 0) {
+                globalAvailable = true
+                localAvailable = true
+                //向所有人发送 token 无人使用
+                console.log("All server done writing task, token release")
+                for (let [key, value] of activeSocket) {
+                    value.acti.emit("releaseToken")
+                }
+            } else {
+                console.log("wake up all local threads")
+                localAvailable = true
+                emitter.emit("wakeup")
+                // 应答在这里触发，通知所有本地on来检测是否自己应该干活
+            }
+            numCompleteWriteOrder = 0
 
 
-// //recv SQL file
-// socketWithS1.on('sendSQL', function (data, filename) {
-//     renewDB(data, filename);
-// })
+        }
 
-// socketWithS2.on('sendSQL', function (data, filename) {
-//     renewDB(data, filename);
-// })
+    })
 
-
-
-function sendLocalSql(){
-    // console.log(ioS0.sockets.in("serverRoom"));
-    ioS0.sockets.in("serverRoom").emit('hello',1);
 }
 
 function askMaster(response, socket){
     if(response == -1 && master == -1){
         numNoMaster ++;
-        console.log("numMa" + numNoMaster, "min req" + minServerRequire)
         // more than half servers have no master
         if(numNoMaster>minServerRequire){
             // start leader election
             numNoMaster = 0;
-            console.log("start leader election");
+            console.log("Start leader election");
             for (let[key, value] of activeSocket){
                 // if(value.acti === socket){
-                    startElection(value.acti, id, key);
+                startElection(value.acti, id, key);
                 // }
             }
             // declareMaster=false;
@@ -304,42 +301,100 @@ function askMaster(response, socket){
     }
     else if(response != -1){
         master = response;
-        console.log("master changed to ",master);
+        console.log("My Master status changed to Server",master);
     }
 }
 
 function startElection(socket, id, aimId){
-    console.log("s"+id+" send election request to s"+aimId);
     //send my id & dbVersion
     let info={'id':id,'dbVersion':dbVersion}
     socket.emit('requestElection',info);
 }
 
 function responseElection(socket,data){
-    console.log("s"+id+"responses election request to s"+data.id);
     let targetId=data.id;
     let targetDBVersion=data.dbVersion;
 
     if(dbVersion>targetDBVersion) {
         // 0 is quit: ask target quit
         socket.emit('responseElection', 0);
-        console.log("Election response 0")
     }else if(dbVersion==targetDBVersion){
         if(id>targetId){
             // 0 is quit: ask target quit
             socket.emit('responseElection',0);
-            console.log("Election response 0")
-
         }else{
             //1 is okay: allow target keep going election
             socket.emit('responseElection',1);
-            console.log("Election response 1")
-
         }
     }else{
         //1 is okay: allow target keep going election
         socket.emit('responseElection',1);
-        console.log("Election response 1")
+    }
+}
 
+
+
+async function processAddOrder(UUID, input, socket, checkInfo) {
+    if(JSON.parse(checkInfo).content.quantity<input.quantityToBuy){
+
+        let result = JSON.stringify({status: 0, content: "Storage is less than the quantityToBuy"})
+        socket.emit('responseUserOrderStatus', result)
+        console.log("wtf")
+
+    }
+    else{
+        //try to get token
+        if (globalAvailable || localAvailable) {
+
+            if(whoHold == id && localAvailable){
+                if (waitingList[0] == UUID){
+                    // 我手上持有token 并且本地可用 并我是list中第一位
+                    //执行写入操作
+                    try {
+                        await DB.editItemQuantity(input.tableName, input.idName, input.id, input.quantityToBuy)
+                        await DB.insertOrder(input.insertOrderData)
+                        dbVersion++
+                        await DB.editVersion(dbVersion)
+                    } catch (e) {
+                        let result = JSON.stringify({status: 0, content: e.message})
+                        socket.emit('responseUserOrderStatus', result)
+                    }
+                    let result = JSON.stringify({status: 1, content: "Order successfully placed"})
+                    socket.emit('responseUserOrderStatus', result)
+                    //向别人发送写入操作指令
+                    console.log("Server "+id+": Send back", result)
+                    for(let[key, value] of activeSocket){
+                        value.acti.emit("writeOrder", input)
+                    }
+
+                }else{
+                    //等待并重新执行
+                    emitter.once("wakeup", async () => {
+                        await processAddOrder(UUID, input, socket, checkInfo)
+                    })
+                }
+            }
+            else if(whoHold == id && !localAvailable){
+                // 我手上持有token 并且本地其他线程在干活。
+                emitter.once("wakeup", async () => {
+                    await processAddOrder(UUID, input, socket, checkInfo)
+                })
+            }
+            else if(whoHold != id){
+                activeSocket.get(whoHold).acti.emit("requestToken", id)
+                //有活 但Token被其他server拥有但空闲，
+                //手上没有Token 需要找别人要
+                emitter.once("wakeup", async () => {
+                    console.log(whoHold)
+                    await processAddOrder(UUID, input, socket, checkInfo)
+                })
+            }
+        }
+        else if(!globalAvailable){
+            //有活 但Token被其他server占用， 等待并重新执行
+            emitter.once("wakeup", async () => {
+                await processAddOrder(UUID, input, socket, checkInfo)
+            })
+        }
     }
 }

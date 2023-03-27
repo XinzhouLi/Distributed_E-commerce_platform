@@ -30,8 +30,8 @@ async function getInfoByID(tableName, idName, id) {
     let db = new dbFile.Database();
     await db.connect();
     let query =
-      "SELECT * FROM " + tableName + ' WHERE "' + idName + '" = "' + id + '"';
-    console.log(query);
+        "SELECT * FROM " + tableName + ' WHERE "' + idName + '" = "' + id + '"';
+    // console.log(query);
     let result = await db.get(query);
     // console.log(result[0])
     if (result == null) {
@@ -47,14 +47,14 @@ async function editItemQuantity(tableName, idName, id, quantityToBuy) {
   let db = new dbFile.Database();
   await db.connect();
   let query1 =
-    "SELECT quantity FROM " +
-    tableName +
-    ' WHERE "' +
-    idName +
-    '" = "' +
-    id +
-    '"';
-  console.log(query1)
+      "SELECT quantity FROM " +
+      tableName +
+      ' WHERE "' +
+      idName +
+      '" = "' +
+      id +
+      '"';
+  // console.log(query1)
   let temp = await db.all(query1);
   // console.log(temp);
   let new_quantity = temp[0]["quantity"] - quantityToBuy;
@@ -62,27 +62,36 @@ async function editItemQuantity(tableName, idName, id, quantityToBuy) {
     throw new Error("Result in quantity smaller than 0");
   }
   let query2 =
-    'UPDATE "' + tableName + '" SET quantity = ? WHERE "' + idName + '" = ?';
-  console.log(query2)
+      'UPDATE "' + tableName + '" SET quantity = ? WHERE "' + idName + '" = ?';
+  // console.log(query2)
+  // console.log("quantity: "+new_quantity+" id: "+id)
   await db.run(query2, [new_quantity, id]);
 }
-
+// insertOrderData example: "'YEBD','chao','188 harvest rose','4563888855742057','05/16','826','Table88'"
 async function insertOrder(OrderData) {
   let db = new dbFile.Database();
   await db.connect();
   let query =
-    "INSERT INTO orderInfo(orderId, customerName,customerAddress, cardNumber, exp_date, secu_code, itemName) values(" +
-    OrderData +
-    ")";
+      "INSERT INTO orderInfo(orderId, customerName,customerAddress, cardNumber, exp_date, secu_code, itemName) values(" +
+      OrderData +
+      ")";
   // console.log(query)
   await db.run(query);
 }
 
-async function insertVersion(versionNum) {
+async function editVersion(versionNum) {
   let db = new dbFile.Database();
   await db.connect();
-  let query = "INSERT INTO version(versionNum) values(" + versionNum + ")";
-  await db.run(query);
+  let query = 'UPDATE "version" SET versionNum = ? WHERE "id" = 1';
+  await db.run(query, versionNum);
+}
+
+async function getVersion() {
+  let db = new dbFile.Database();
+  await db.connect();
+  let query = "SELECT versionNum FROM version WHERE id = 1";
+  let result = await db.get(query)
+  return result;
 }
 
 async function sendLocalSQL(dbName, socket) {
@@ -113,7 +122,7 @@ async function sendLocalSQL(dbName, socket) {
 async function applyMasterSQL(dbName, data, filename) {
   //data, filename from socket 'sendsql'
   let db = new dbFile.Database();
-  console.log(data);
+  // console.log(data);
   await writeFile("db/" + filename, data);
   await db.connect();
   // later for increase the speed of process to make it to Promiss.all
@@ -126,13 +135,16 @@ async function applyMasterSQL(dbName, data, filename) {
   await db.close();
   await exec("sqlite3 db/" + dbName + " < db/master.sql");
 }
-// getAllInfo("tables")
 // getInfoByID("bed", "bedId", "b01")
 // editItemQuantity('bed', 'bedId','b01','1')
 // insertOrder('"ABDC","chao","188 harvest rose","4563888855742057","05/16","826","Table66"')
-// insertVersion(10)
-
-exports.insertVersion = insertVersion;
+// async function f() {
+//   let a = await getVersion()
+//   console.log(a)
+// }
+// f()
+exports.getVersion = getVersion;
+exports.editVersion = editVersion;
 exports.getAllInfo = getAllInfo;
 exports.getInfoByID = getInfoByID;
 exports.editItemQuantity = editItemQuantity;
