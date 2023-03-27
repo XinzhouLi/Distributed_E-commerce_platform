@@ -4,6 +4,7 @@ let minServerRequire=parseInt(totalServer/2);
 // Multiple server communication:
 //parameters for election
 let quitElection = false;
+let needElection = false;
 let electionReponseNum=0;
 let totalAlive=1;
 let id =0;
@@ -25,7 +26,7 @@ const waitingList = [];
 let ifSendToken=true;
 let numCompleteWriteOrder = 0;
 
-const ioWithLoadBalancer = require('socket.io')(5101);
+const ioWithLoadBalancer = require('socket.io')(5105);
 // make connection with Server 1: port 6000
 let activeIo = require('socket.io-client');
 let socketWithS1 = activeIo.connect("http://localhost:6100/", {
@@ -273,7 +274,7 @@ async function registerListener(sendSocket) {
     sendSocket.on('sendSQL', async function (data, filename) {
         await DB.applyMasterSQL(db, data, filename);
         let temp = await DB.getVersion()
-        dbVersion = temp[0][versionNum]
+        dbVersion = temp["versionNum"]
         console.log("Receive SQL file from Master");
     });
 

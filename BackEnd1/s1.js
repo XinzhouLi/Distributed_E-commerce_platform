@@ -248,7 +248,7 @@ async function registerListener(sendSocket) {
         await DB.applyMasterSQL(db, data, filename);
         let temp = await DB.getVersion()
         console.log(temp)
-        dbVersion = temp[0]["versionNum"]
+        dbVersion = temp["versionNum"]
         console.log("Receive SQL file from Master");
     });
 
