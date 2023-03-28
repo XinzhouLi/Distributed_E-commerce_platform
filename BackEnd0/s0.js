@@ -40,9 +40,22 @@ let socketWithS2 = activeIo.connect("http://localhost:7100/", {
 });
 registerListener(socketWithS2);
 
+const ioS0 = require('socket.io')(5100)
 
 
-const ioS0 = require('socket.io')(5100);
+
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+//下面都是可以被复制的
+//用了更多的三目运算来优化了之前老要调添加对应的socket到map中
 ioWithLoadBalancer.on('connection', function (socket) {
     console.log('Server '+id+': connected with Load Balancer:', socket.client.id);
 
@@ -72,20 +85,7 @@ ioWithLoadBalancer.on('connection', function (socket) {
     });
 
 });
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-
-//下面都是可以被复制的
-//用了更多的三目运算来优化了之前老要调添加对应的socket到map中
-
 ioS0.on('connect', async function(socket){
-    dbVersion = await DB.getVersion();
     totalAlive ++;
     console.log("Current alive: ", totalAlive);
     socket.emit('who')
@@ -126,6 +126,7 @@ ioS0.on('connect', async function(socket){
     //Listen for request master
     socket.on('requestMaster', function(){
         socket.emit('responseMaster',master);
+        console.log(0)
     });
 
     socket.on('requestElection', function (data){
@@ -218,17 +219,19 @@ ioS0.on('connect', async function(socket){
 
     })
     socket.on("TokenHolderChanged", (newHolderID, gStatus) => {
-        console.log("Server "+newHolderID+" now holds token, try wakeup all the local thread")
         whoHold = newHolderID
+        console.log("Server "+newHolderID+" now holds token" )
+        if(newHolderID == id){
+            console.log("Server "+newHolderID+"try wakeup all the local thread")
+        }
         globalAvailable = gStatus
         emitter.emit("wakeup")
     })
 });
 
 
-//都可以被直接拷贝
 async function registerListener(sendSocket) {
-
+    dbVersion = (await DB.getVersion())["versionNum"];
     sendSocket.on('responseMaster', function (response) {
         askMaster(response, sendSocket);
     });
@@ -248,7 +251,7 @@ async function registerListener(sendSocket) {
             quitElection = false;
             console.log("election response error : " + data)
         }
-        // console.log('electionReponseNum from s0 ' + electionReponseNum + " vote is:" + data)
+        console.log('electionReponseNum from s0 ' + electionReponseNum + " vote is:" + data)
         if (electionReponseNum === (totalAlive - 1)) {
             if (!quitElection) {
                 //broadcast I am new leader!!!
@@ -367,11 +370,11 @@ function responseElection(socket,data){
 
 
 async function processAddOrder(UUID, input, socket, checkInfo) {
+    console.log("sss")
     if(JSON.parse(checkInfo).content.quantity<input.quantityToBuy){
 
         let result = JSON.stringify({status: 0, content: "Storage is less than the quantityToBuy"})
         socket.emit('responseUserOrderStatus', result)
-        console.log("wtf")
 
     }
     else{
@@ -413,6 +416,7 @@ async function processAddOrder(UUID, input, socket, checkInfo) {
                 })
             }
             else if(whoHold != id){
+                console.log(whoHold, globalAvailable)
                 activeSocket.get(whoHold).acti.emit("requestToken", id)
                 //有活 但Token被其他server拥有但空闲，
                 //手上没有Token 需要找别人要

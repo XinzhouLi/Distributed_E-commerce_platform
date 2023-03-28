@@ -20,11 +20,14 @@ let activeSocket = new Map();
 let db = "db2.db";
 
 //init variables for consistency
+const events = require('events');
+let emitter = new events.EventEmitter()
 let localAvailable = true;
 let globalAvailable = true;
 let whoHold = -1;
 const waitingList = [];
 let ifSendToken=true;
+let numCompleteWriteOrder = 0;
 // make connection with Server 1: port 6000
 let activeIo = require('socket.io-client');
 let socketWithS0 = activeIo.connect("http://localhost:5100/", {
@@ -51,9 +54,36 @@ const ioWithLoadBalancer = require('socket.io')(5300);
 
 //下面都是可以被复制的
 //用了更多的三目运算来优化了之前老要调添加对应的socket到map中
+ioWithLoadBalancer.on('connection', function (socket) {
+    console.log('Server '+id+': connected with Load Balancer:', socket.client.id);
 
+    socket.on('requestSingleItem', async function (data) {
+        console.log('Server '+ id+' process requestSingleItem')
+        let input = data
+        let result = await DB.getInfoByID(input.tableName, input.idName, input.id)
+        socket.emit('responseSingleItemInfo', result)
+        console.log('Server '+id+' Send back', result)
+    });
+
+    socket.on('requestAllCateInfo', async function (data) {
+        console.log('Server '+ id+' process requestAllCateInfo')
+        let input = data;
+        let result = await DB.getAllInfo(input.tableName)
+        socket.emit('responseAllCateInfo', result)
+        console.log('Server '+id+' Send back', result)
+    });
+
+    socket.on('addOrder', async function (data) {
+        let input = data;
+        console.log('Server '+ id+' process addOrder')
+        let UUID = Math.floor(Math.random() * 1000000)
+        let checkInfo = await DB.getInfoByID(input.tableName, input.idName, input.id)
+        waitingList.push(UUID)
+        await processAddOrder(UUID, input, socket, checkInfo)
+    });
+
+});
 ioS2.on('connect', async function(socket){
-    dbVersion = await DB.getVersion();
     totalAlive ++;
     console.log("Current alive: ", totalAlive);
     socket.emit('who')
@@ -186,17 +216,19 @@ ioS2.on('connect', async function(socket){
 
     })
     socket.on("TokenHolderChanged", (newHolderID, gStatus) => {
-        console.log("Server "+newHolderID+" now holds token, try wakeup all the local thread")
         whoHold = newHolderID
+        console.log("Server "+newHolderID+" now holds token" )
+        if(newHolderID == id){
+            console.log("Server "+newHolderID+"try wakeup all the local thread")
+        }
         globalAvailable = gStatus
         emitter.emit("wakeup")
     })
 });
 
 
-//都可以被直接拷贝
 async function registerListener(sendSocket) {
-
+    dbVersion = (await DB.getVersion())["versionNum"];
     sendSocket.on('responseMaster', function (response) {
         askMaster(response, sendSocket);
     });
@@ -216,7 +248,7 @@ async function registerListener(sendSocket) {
             quitElection = false;
             console.log("election response error : " + data)
         }
-        // console.log('electionReponseNum from s0 ' + electionReponseNum + " vote is:" + data)
+        console.log('electionReponseNum from s0 ' + electionReponseNum + " vote is:" + data)
         if (electionReponseNum === (totalAlive - 1)) {
             if (!quitElection) {
                 //broadcast I am new leader!!!
@@ -242,7 +274,6 @@ async function registerListener(sendSocket) {
     sendSocket.on('sendSQL', async function (data, filename) {
         await DB.applyMasterSQL(db, data, filename);
         let temp = await DB.getVersion()
-        console.log(temp)
         dbVersion = temp["versionNum"]
         console.log("Receive SQL file from Master");
     });
@@ -284,6 +315,7 @@ async function registerListener(sendSocket) {
 }
 
 function askMaster(response, socket){
+    console.log("I got master info response")
     if(response == -1 && master == -1){
         numNoMaster ++;
         // more than half servers have no master
@@ -336,11 +368,11 @@ function responseElection(socket,data){
 
 
 async function processAddOrder(UUID, input, socket, checkInfo) {
+    console.log("sss")
     if(JSON.parse(checkInfo).content.quantity<input.quantityToBuy){
 
         let result = JSON.stringify({status: 0, content: "Storage is less than the quantityToBuy"})
         socket.emit('responseUserOrderStatus', result)
-        console.log("wtf")
 
     }
     else{
@@ -382,7 +414,11 @@ async function processAddOrder(UUID, input, socket, checkInfo) {
                 })
             }
             else if(whoHold != id){
+                console.log(whoHold, globalAvailable)
                 activeSocket.get(whoHold).acti.emit("requestToken", id)
+                activeSocket.get(whoHold).acti.emit("requestTokenInfo")
+                console.log("????")
+                console.log(activeSocket)
                 //有活 但Token被其他server拥有但空闲，
                 //手上没有Token 需要找别人要
                 emitter.once("wakeup", async () => {

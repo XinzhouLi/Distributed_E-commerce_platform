@@ -138,11 +138,11 @@ async function applyMasterSQL(dbName, data, filename) {
 // getInfoByID("bed", "bedId", "b01")
 // editItemQuantity('bed', 'bedId','b01','1')
 // insertOrder('"ABDC","chao","188 harvest rose","4563888855742057","05/16","826","Table66"')
-async function f() {
-  let a = await getVersion()
-  console.log(a)
-}
-f()
+// async function f() {
+//   let a = await getVersion()
+//   console.log(a)
+// }
+// f()
 exports.getVersion = getVersion;
 exports.editVersion = editVersion;
 exports.getAllInfo = getAllInfo;
