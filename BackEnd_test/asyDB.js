@@ -31,7 +31,7 @@ async function getInfoByID(tableName, idName, id) {
     await db.connect();
     let query =
       "SELECT * FROM " + tableName + ' WHERE "' + idName + '" = "' + id + '"';
-    // console.log(query);
+    console.log(query);
     let result = await db.get(query);
     // console.log(result[0])
     if (result == null) {
@@ -79,19 +79,11 @@ async function insertOrder(OrderData) {
   await db.run(query);
 }
 
-async function editVersion(versionNum) {
+async function insertVersion(versionNum) {
   let db = new dbFile.Database();
   await db.connect();
-  let query = 'UPDATE "version" SET versionNum = ? WHERE "id" = 1';
-  await db.run(query, versionNum);
-}
-
-async function getVersion() {
-  let db = new dbFile.Database();
-  await db.connect();
-  let query = "SELECT versionNum FROM version WHERE id = 1";
-  let result = await db.get(query)
-  return result;
+  let query = "INSERT INTO version(versionNum) values(" + versionNum + ")";
+  await db.run(query);
 }
 
 async function sendLocalSQL(dbName, socket) {
@@ -122,7 +114,7 @@ async function sendLocalSQL(dbName, socket) {
 async function applyMasterSQL(dbName, data, filename) {
   //data, filename from socket 'sendsql'
   let db = new dbFile.Database();
-  // console.log(data);
+  console.log(data);
   await writeFile("db/" + filename, data);
   await db.connect();
   // later for increase the speed of process to make it to Promiss.all
@@ -135,16 +127,13 @@ async function applyMasterSQL(dbName, data, filename) {
   await db.close();
   await exec("sqlite3 db/" + dbName + " < db/master.sql");
 }
+// getAllInfo("tables")
 // getInfoByID("bed", "bedId", "b01")
 // editItemQuantity('bed', 'bedId','b01','1')
 // insertOrder('"ABDC","chao","188 harvest rose","4563888855742057","05/16","826","Table66"')
-// async function f() {
-//   let a = await getVersion()
-//   console.log(a)
-// }
-// f()
-exports.getVersion = getVersion;
-exports.editVersion = editVersion;
+// insertVersion(10)
+
+exports.insertVersion = insertVersion;
 exports.getAllInfo = getAllInfo;
 exports.getInfoByID = getInfoByID;
 exports.editItemQuantity = editItemQuantity;

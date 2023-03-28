@@ -82,7 +82,7 @@ var serverNumList = new Array();
 
 
 var ioWithLb0 = require('socket.io-client');
-var socketWithLb0 = ioWithLb0.connect("http://localhost:3000/", {
+var socketWithLb0 = ioWithLb0.connect("http://localhost:6666/", {
     reconnection: true
 });
 
@@ -103,7 +103,7 @@ function sleep(time) {
 }
 
 async function output() {
-    const ioWithFrontEnd = require('socket.io')(3012, {
+    const ioWithFrontEnd = require('socket.io')(3010, {
         cors: {
             origin: '*',
         }
