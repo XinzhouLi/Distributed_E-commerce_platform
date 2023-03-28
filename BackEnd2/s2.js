@@ -93,7 +93,7 @@ ioS2.on('connect', async function(socket){
     })
     if(isMaster){
         console.log("Server "+id+" SQL file sent to slaves");
-        await DB.sendLocalSQL(db, socket);
+        DB.sendLocalSQL(db, socket);
     }
 
 
@@ -146,17 +146,18 @@ ioS2.on('connect', async function(socket){
         console.log("Token initialize to hold by Server "+ data);
     })
 
-    socket.on('disconnect', ()=>{
+    socket.on('disconnecteddd', ()=>{
         totalAlive --;
         console.log("Remaining alive: ", totalAlive);
         let offServer;
         // delete off server info
         for (let[key, value] of activeSocket){
-            if(value.react === socket){
+            if(value.acti === socket){
                 offServer = key;
                 activeSocket.delete(key);
             }
         }
+        console.log("表里现在有几个"+activeSocket.size())
 
 
         if(offServer == master) {
@@ -311,7 +312,47 @@ async function registerListener(sendSocket) {
         }
 
     })
+    sendSocket.on('disconnect', ()=>{
+        totalAlive --;
+        console.log("Remaining alive: ", totalAlive);
+        let offServer;
+        // delete off server info
+        for (let[key, value] of activeSocket){
+            if(value.acti === sendSocket){
+                offServer = key;
+                activeSocket.delete(key);
+            }
+        }
 
+        console.log("表里现在有几个"+activeSocket.size)
+
+        if(offServer == master) {
+            if(offServer == whoHold) {
+                console.log("Master with token failed, start leader election and reset token");
+                electionReponseNum = 0;
+                for (let[key, value] of activeSocket){
+                    startElection(value.acti, id, key);
+                }
+            }else {
+                ifSendToken = false;
+                console.log("Only Master failed, start leader election without reset token");
+                electionReponseNum = 0;
+                for (let [key, value] of activeSocket) {
+                    startElection(value.acti, id, key);
+                }
+            }
+        }else{
+            if(offServer == whoHold){
+                console.log("only token failed, reset token to Master")
+                whoHold = master;
+                globalAvailable = true
+            }
+            // else{
+            //     console.log("the failed server is not master and not hold token, do nothing")
+            // }
+        }
+
+    });
 }
 
 function askMaster(response, socket){
@@ -368,7 +409,6 @@ function responseElection(socket,data){
 
 
 async function processAddOrder(UUID, input, socket, checkInfo) {
-    console.log("sss")
     if(JSON.parse(checkInfo).content.quantity<input.quantityToBuy){
 
         let result = JSON.stringify({status: 0, content: "Storage is less than the quantityToBuy"})

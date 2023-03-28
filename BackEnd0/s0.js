@@ -26,17 +26,17 @@ const waitingList = [];
 let ifSendToken=true;
 let numCompleteWriteOrder = 0;
 
-const ioWithLoadBalancer = require('socket.io')(5105);
+const ioWithLoadBalancer = require('socket.io')(5101);
 // make connection with Server 1: port 6000
 let activeIo = require('socket.io-client');
 let socketWithS1 = activeIo.connect("http://localhost:6100/", {
-    reconnection: true
+    // reconnection: true
 });
 registerListener(socketWithS1);
 
 // make connection with Server 2: port 7000
 let socketWithS2 = activeIo.connect("http://localhost:7100/", {
-    reconnection: true
+    // reconnection: true
 });
 registerListener(socketWithS2);
 
@@ -95,7 +95,7 @@ ioS0.on('connect', async function(socket){
     })
     if(isMaster){
         console.log("Server "+id+" SQL file sent to slaves");
-        await DB.sendLocalSQL(db, socket);
+         DB.sendLocalSQL(db, socket);
     }
 
 
@@ -149,46 +149,46 @@ ioS0.on('connect', async function(socket){
         console.log("Token initialize to hold by Server "+ data);
     })
 
-    socket.on('disconnect', ()=>{
-        totalAlive --;
-        console.log("Remaining alive: ", totalAlive);
-        let offServer;
-        // delete off server info
-        for (let[key, value] of activeSocket){
-            if(value.react === socket){
-                offServer = key;
-                activeSocket.delete(key);
-            }
-        }
-
-
-        if(offServer == master) {
-            if(offServer == whoHold) {
-                console.log("Master with token failed, start leader election and reset token");
-                electionReponseNum = 0;
-                for (let[key, value] of activeSocket){
-                    startElection(value.acti, id, key);
-                }
-            }else {
-                ifSendToken = false;
-                console.log("Only Master failed, start leader election without reset token");
-                electionReponseNum = 0;
-                for (let [key, value] of activeSocket) {
-                    startElection(value.acti, id, key);
-                }
-            }
-        }else{
-            if(offServer == whoHold){
-                console.log("only token failed, reset token to Master")
-                whoHold = master;
-                globalAvailable = true
-            }
-            // else{
-            //     console.log("the failed server is not master and not hold token, do nothing")
-            // }
-        }
-   
-    });
+    // socket.on('disconnect', ()=>{
+    //     totalAlive --;
+    //     console.log("Remaining alive: ", totalAlive);
+    //     let offServer;
+    //     // delete off server info
+    //     for (let[key, value] of activeSocket){
+    //         if(value.react === socket){
+    //             offServer = key;
+    //             activeSocket.delete(key);
+    //         }
+    //     }
+    //
+    //
+    //     if(offServer == master) {
+    //         if(offServer == whoHold) {
+    //             console.log("Master with token failed, start leader election and reset token");
+    //             electionReponseNum = 0;
+    //             for (let[key, value] of activeSocket){
+    //                 startElection(value.acti, id, key);
+    //             }
+    //         }else {
+    //             ifSendToken = false;
+    //             console.log("Only Master failed, start leader election without reset token");
+    //             electionReponseNum = 0;
+    //             for (let [key, value] of activeSocket) {
+    //                 startElection(value.acti, id, key);
+    //             }
+    //         }
+    //     }else{
+    //         if(offServer == whoHold){
+    //             console.log("only token failed, reset token to Master")
+    //             whoHold = master;
+    //             globalAvailable = true
+    //         }
+    //         // else{
+    //         //     console.log("the failed server is not master and not hold token, do nothing")
+    //         // }
+    //     }
+    //
+    // });
     //tell the asking server who hold the token
     socket.on("requestTokenInfo", ()=>{
         socket.emit("responseTokenInfo",whoHold, globalAvailable)
@@ -314,7 +314,47 @@ async function registerListener(sendSocket) {
         }
 
     })
+    sendSocket.on('disconnect', ()=>{
+        totalAlive --;
+        console.log("Remaining alive: ", totalAlive);
+        let offServer;
+        // delete off server info
+        for (let[key, value] of activeSocket){
+            if(value.acti === sendSocket){
+                offServer = key;
+                activeSocket.delete(key);
+            }
+        }
+        console.log("表里现在有几个"+activeSocket.size)
 
+
+        if(offServer == master) {
+            if(offServer == whoHold) {
+                console.log("Master with token failed, start leader election and reset token");
+                electionReponseNum = 0;
+                for (let[key, value] of activeSocket){
+                    startElection(value.acti, id, key);
+                }
+            }else {
+                ifSendToken = false;
+                console.log("Only Master failed, start leader election without reset token");
+                electionReponseNum = 0;
+                for (let [key, value] of activeSocket) {
+                    startElection(value.acti, id, key);
+                }
+            }
+        }else{
+            if(offServer == whoHold){
+                console.log("only token failed, reset token to Master")
+                whoHold = master;
+                globalAvailable = true
+            }
+            // else{
+            //     console.log("the failed server is not master and not hold token, do nothing")
+            // }
+        }
+
+    });
 }
 
 function askMaster(response, socket){
@@ -370,7 +410,6 @@ function responseElection(socket,data){
 
 
 async function processAddOrder(UUID, input, socket, checkInfo) {
-    console.log("sss")
     if(JSON.parse(checkInfo).content.quantity<input.quantityToBuy){
 
         let result = JSON.stringify({status: 0, content: "Storage is less than the quantityToBuy"})
