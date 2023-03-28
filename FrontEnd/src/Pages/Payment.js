@@ -1,10 +1,23 @@
 import React, { useState } from 'react';
-import { Container, Button, Form } from 'react-bootstrap'
+import {
+	Container, 
+	Button, 
+	Form, 
+	Modal,
+	ModalBody,
+	ModalHeader,
+	ModalFooter,
+	ModalTitle,
+	Alert,
+} from 'react-bootstrap'
 // import 'bootstrap/dist/css/bootstrap.min.css'
+import { useNavigate } from "react-router-dom";
 import socketConfig from '../socketConfig.js';
 
 
 function Payment() {
+
+	const navigate = useNavigate(); // react-router-dom v6
 
 	const queryParam = new URLSearchParams(window.location.search)
 	const cateName = queryParam.get("cateName")
@@ -45,8 +58,23 @@ function Payment() {
 			let socketData = JSON.parse(data)
 			console.log("socketData is below")
 			console.log(socketData)
+			if(socketData.status == 1){
+				setOrderStatus(socketData.content + " !	Your Order Number is: "+UUID)
+			}
+			else{
+				setOrderStatus(socketData.content+" !	We will inform you when we have it ")
+			}
+			console.log(orderStatus)
+			setShow(true)
 		})
 	}
+	const [orderStatus,setOrderStatus] = useState("");
+	const [show, setShow] = useState(false);
+	const handleClose = () => {
+		setShow(false);
+		navigate('/');
+	}
+		
 
 	return (
 		<div className="App">
@@ -114,6 +142,20 @@ function Payment() {
 
 					<Button onClick={() => handleSubmit()}>Submit</Button>
 				</Container>
+
+				<Modal show={show} onHide={handleClose}>
+					<Modal.Header closeButton>
+						<Modal.Title>Warning</Modal.Title>
+					</Modal.Header>
+					<Modal.Body>
+						Woohoo! {orderStatus} 
+					</Modal.Body>
+					<Modal.Footer>
+						<Button variant="primary" onClick={handleClose}>
+							OK
+						</Button>
+					</Modal.Footer>
+				</Modal>
 			</header>
 		</div>
 	);
