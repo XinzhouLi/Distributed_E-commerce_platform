@@ -4,8 +4,6 @@ import {
   Row,
   Col,
   Button,
-  Alert,
-  Breadcrumb,
   Card,
   Form,
   Modal,
@@ -72,6 +70,7 @@ function MainPage() {
             value={orderInfo}
             onChange={(e) => setOrderInfo(e.target.value)}
           ></Form.Control>
+          <br></br>
 
           <button
             type="button"
@@ -103,8 +102,8 @@ function MainPage() {
               <Card style={{ color: "black" }}>
                 <Card.Img src="https://source.unsplash.com/random/50×50/?chair" />
                 <Card.Body>
-                  <Card.Title>Card Example</Card.Title>
-                  <Card.Text>Something</Card.Text>
+                  <Card.Title><h2>Chair</h2></Card.Title>
+                  <Card.Text>Looking for more chair options</Card.Text>
                   <Button
                     id="chair"
                     variant="primary"
@@ -121,8 +120,8 @@ function MainPage() {
               <Card style={{ color: "black" }}>
                 <Card.Img src="https://source.unsplash.com/random/50×50/?table" />
                 <Card.Body>
-                  <Card.Title>Card Example</Card.Title>
-                  <Card.Text>Something</Card.Text>
+                  <Card.Title><h2>Table</h2></Card.Title>
+                  <Card.Text>Looking for more table options</Card.Text>
                   <Button
                     id="tables"
                     variant="primary"
@@ -141,8 +140,8 @@ function MainPage() {
               <Card style={{ color: "black" }}>
                 <Card.Img src="https://source.unsplash.com/random/50×50/?bed" />
                 <Card.Body>
-                  <Card.Title>Card Example</Card.Title>
-                  <Card.Text>Something</Card.Text>
+                  <Card.Title><h2>Bed</h2></Card.Title>
+                  <Card.Text>Looking for more bed options</Card.Text>
                   <Button
                     id="bed"
                     variant="primary"
@@ -159,8 +158,8 @@ function MainPage() {
               <Card style={{ color: "black" }}>
                 <Card.Img src="https://source.unsplash.com/random/50×50/?sofa" />
                 <Card.Body>
-                  <Card.Title>Card Example</Card.Title>
-                  <Card.Text>Something</Card.Text>
+                  <Card.Title><h2>Sofa</h2></Card.Title>
+                  <Card.Text>Looking for more sofa options</Card.Text>
                   <Button
                     id="sofa"
                     variant="primary"
@@ -173,14 +172,6 @@ function MainPage() {
               </Card>
             </Col>
           </Row>
-
-          <Breadcrumb>
-            <Breadcrumb.Item>Test</Breadcrumb.Item>
-            <Breadcrumb.Item>Test1</Breadcrumb.Item>
-            <Breadcrumb.Item>Test2</Breadcrumb.Item>
-          </Breadcrumb>
-          <Alert variant="secondary">This is a button</Alert>
-          <Button>Test Button</Button>
         </Container>
       </header>
     </div>
