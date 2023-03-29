@@ -130,7 +130,6 @@ ioS1.on('connect', async function(socket){
     //Listen for request master
     socket.on('requestMaster', function(){
         socket.emit('responseMaster',master);
-        console.log(1)
     });
 
     socket.on('requestElection', function (data){
@@ -187,9 +186,6 @@ ioS1.on('connect', async function(socket){
                 whoHold = master;
                 globalAvailable = true
             }
-            // else{
-            //     console.log("the failed server is not master and not hold token, do nothing")
-            // }
         }
 
     });

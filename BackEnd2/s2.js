@@ -157,7 +157,7 @@ ioS2.on('connect', async function(socket){
                 activeSocket.delete(key);
             }
         }
-        console.log("表里现在有几个"+activeSocket.size())
+        // console.log("表里现在有几个"+activeSocket.size())
 
 
         if(offServer == master) {
@@ -324,7 +324,7 @@ async function registerListener(sendSocket) {
             }
         }
 
-        console.log("表里现在有几个"+activeSocket.size)
+        // console.log("表里现在有几个"+activeSocket.size)
 
         if(offServer == master) {
             if(offServer == whoHold) {
@@ -456,9 +456,10 @@ async function processAddOrder(UUID, input, socket, checkInfo) {
             else if(whoHold != id){
                 console.log(whoHold, globalAvailable)
                 activeSocket.get(whoHold).acti.emit("requestToken", id)
-                activeSocket.get(whoHold).acti.emit("requestTokenInfo")
-                console.log("????")
-                console.log(activeSocket)
+                // activeSocket.get(whoHold).acti.emit("requestTokenInfo")
+                // console.log("????")
+                // console.log(activeSocket)
+
                 //有活 但Token被其他server拥有但空闲，
                 //手上没有Token 需要找别人要
                 emitter.once("wakeup", async () => {

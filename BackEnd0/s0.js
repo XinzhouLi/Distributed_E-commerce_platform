@@ -325,7 +325,7 @@ async function registerListener(sendSocket) {
                 activeSocket.delete(key);
             }
         }
-        console.log("表里现在有几个"+activeSocket.size)
+        // console.log("表里现在有几个"+activeSocket.size)
 
 
         if(offServer == master) {
