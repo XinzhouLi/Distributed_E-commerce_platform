@@ -43,6 +43,7 @@ let socketWithS2 = activeIo.connect("http://localhost:7100/", {
 registerListener(socketWithS2)
 //port 5000 as server side to receive s1 and s2 messages
 const ioS1 = require('socket.io')(6100);
+
 const ioWithLoadBalancer = require('socket.io')(5200);
 
 
@@ -98,6 +99,7 @@ ioS1.on('connect', async function(socket){
     })
     if(isMaster){
         console.log("Server "+id+" SQL file sent to slaves");
+        socket.emit('responseMaster',master);
         DB.sendLocalSQL(db, socket);
     }
 
@@ -129,7 +131,6 @@ ioS1.on('connect', async function(socket){
     //Listen for request master
     socket.on('requestMaster', function(){
         socket.emit('responseMaster',master);
-        console.log(1)
     });
 
     socket.on('requestElection', function (data){
@@ -186,9 +187,6 @@ ioS1.on('connect', async function(socket){
                 whoHold = master;
                 globalAvailable = true
             }
-            // else{
-            //     console.log("the failed server is not master and not hold token, do nothing")
-            // }
         }
 
     });
@@ -330,20 +328,33 @@ async function registerListener(sendSocket) {
             }
         }
 
+        console.log("master is: s"+master)
 
         if(offServer == master) {
-            if(offServer == whoHold) {
-                console.log("Master with token failed, start leader election and reset token");
-                electionReponseNum = 0;
-                for (let[key, value] of activeSocket){
-                    startElection(value.acti, id, key);
-                }
-            }else {
-                ifSendToken = false;
-                console.log("Only Master failed, start leader election without reset token");
-                electionReponseNum = 0;
-                for (let [key, value] of activeSocket) {
-                    startElection(value.acti, id, key);
+
+            console.log("totalAlive="+totalAlive);
+        
+            if(totalAlive == 1) {
+                isMaster = true;
+                master = id;
+                whoHold = id;
+                globalAvailable = true;
+                console.log("Server " + id + " is the only alive server now, " + "Server " + id + " becomes leader");
+            }
+            else {
+                if(offServer == whoHold) {
+                    console.log("Master with token failed, start leader election and reset token");
+                    electionReponseNum = 0;
+                    for (let[key, value] of activeSocket){
+                        startElection(value.acti, id, key);
+                    }
+                }else {
+                    ifSendToken = false;
+                    console.log("Only Master failed, start leader election without reset token");
+                    electionReponseNum = 0;
+                    for (let [key, value] of activeSocket) {
+                        startElection(value.acti, id, key);
+                    }
                 }
             }
         }else{

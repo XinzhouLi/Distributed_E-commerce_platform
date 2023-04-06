@@ -84,7 +84,7 @@ function Payment() {
 						<Form.Group>
 							<Form.Label>CustomerName</Form.Label>
 							<Form.Control
-								placeholder='myq'
+								placeholder='Please input your name'
 								value={name}
 								onChange={e => setName(e.target.value)}
 								type="text">
@@ -96,7 +96,7 @@ function Payment() {
 						<Form.Group>
 							<Form.Label>Address</Form.Label>
 							<Form.Control
-								placeholder='myq.home'
+								placeholder='Please input your mail address'
 								value={address}
 								onChange={e => setAddress(e.target.value)}
 								type="text">
@@ -108,7 +108,7 @@ function Payment() {
 						<Form.Group>
 							<Form.Label>Card Number</Form.Label>
 							<Form.Control
-								placeholder='lxy.visa'
+								placeholder='Please input your card number'
 								value={cardNumber}
 								onChange={e => setCardNumber(e.target.value)}
 								type="text">
@@ -120,7 +120,7 @@ function Payment() {
 						<Form.Group>
 							<Form.Label>exp_date</Form.Label>
 							<Form.Control
-								placeholder='myq'
+								placeholder='Please input your exp_date, ex: 06/14'
 								value={exp_date}
 								onChange={e => setExp_date(e.target.value)}
 								type="text">
@@ -132,7 +132,7 @@ function Payment() {
 						<Form.Group>
 							<Form.Label>secu_code</Form.Label>
 							<Form.Control
-								placeholder='myq'
+								placeholder='Please input your 3 digits CVV'
 								value={secu_code}
 								onChange={e => setSecu_code(e.target.value)}
 								type="text">

@@ -76,6 +76,7 @@ function SpecificCategory() {
 						</Form.Group>
 					</Form>
 					<Button>Submit</Button>
+					
 
 					<Row>
 						<Col>
@@ -83,11 +84,11 @@ function SpecificCategory() {
 								<Card.Img src={imageURL} />
 								<Card.Body>
 									<Card.Title>
-										{obj1Name}
+										<h2>{obj1Name}</h2>
 									</Card.Title>
 									<Card.Text>
 									</Card.Text>
-									<Button id='obj1' variant='primary' onClick={(e) => handleBtnClick(e)}> More </Button>
+									<Button id='obj1' variant='primary' onClick={(e) => handleBtnClick(e)}> Detail </Button>
 								</Card.Body>
 							</Card>
 						</Col>
@@ -97,11 +98,11 @@ function SpecificCategory() {
 								<Card.Img src={imageURL} />
 								<Card.Body>
 									<Card.Title>
-										{obj2Name}
+										<h2>{obj2Name}</h2>
 									</Card.Title>
 									<Card.Text>
 									</Card.Text>
-									<Button id='obj2' variant='primary' onClick={(e) => handleBtnClick(e)}> More </Button>
+									<Button id='obj2' variant='primary' onClick={(e) => handleBtnClick(e)}> Detail </Button>
 								</Card.Body>
 							</Card>
 						</Col>
@@ -114,11 +115,11 @@ function SpecificCategory() {
 								<Card.Img src={imageURL} />
 								<Card.Body>
 									<Card.Title>
-										{obj3Name}
+										<h2>{obj3Name}</h2>
 									</Card.Title>
 									<Card.Text>
 									</Card.Text>
-									<Button id='obj3' variant='primary' onClick={(e) => handleBtnClick(e)}> More </Button>
+									<Button id='obj3' variant='primary' onClick={(e) => handleBtnClick(e)}> Detail </Button>
 								</Card.Body>
 							</Card>
 						</Col>
@@ -128,11 +129,11 @@ function SpecificCategory() {
 								<Card.Img src={imageURL} />
 								<Card.Body>
 									<Card.Title>
-										{obj4Name}
+										<h2>{obj4Name}</h2>
 									</Card.Title>
 									<Card.Text>
 									</Card.Text>
-									<Button id='obj4' variant='primary' onClick={(e) => handleBtnClick(e)}> More </Button>
+									<Button id='obj4' variant='primary' onClick={(e) => handleBtnClick(e)}> Detail </Button>
 								</Card.Body>
 							</Card>
 						</Col>
