@@ -27,6 +27,8 @@ let ifSendToken=true;
 let numCompleteWriteOrder = 0;
 
 const ioWithLoadBalancer = require('socket.io')(5101);
+
+
 // make connection with Server 1: port 6000
 let activeIo = require('socket.io-client');
 let socketWithS1 = activeIo.connect("http://localhost:6100/", {
@@ -95,6 +97,7 @@ ioS0.on('connect', async function(socket){
     })
     if(isMaster){
         console.log("Server "+id+" SQL file sent to slaves");
+        socket.emit('responseMaster',master);
          DB.sendLocalSQL(db, socket);
     }
 
@@ -329,20 +332,48 @@ async function registerListener(sendSocket) {
 
 
         if(offServer == master) {
-            if(offServer == whoHold) {
-                console.log("Master with token failed, start leader election and reset token");
-                electionReponseNum = 0;
-                for (let[key, value] of activeSocket){
-                    startElection(value.acti, id, key);
-                }
-            }else {
-                ifSendToken = false;
-                console.log("Only Master failed, start leader election without reset token");
-                electionReponseNum = 0;
-                for (let [key, value] of activeSocket) {
-                    startElection(value.acti, id, key);
+            
+
+
+
+
+            if(totalAlive == 1) {
+                isMaster = true;
+                master = id;
+                whoHold = id;
+                globalAvailable = true;
+                console.log("Server " + id + " is the only alive server now, " + "Server " + id + " becomes leader");
+            }
+            else {
+                if(offServer == whoHold) {
+                    console.log("Master with token failed, start leader election and reset token");
+                    electionReponseNum = 0;
+                    for (let[key, value] of activeSocket){
+                        startElection(value.acti, id, key);
+                    }
+                }else {
+                    ifSendToken = false;
+                    console.log("Only Master failed, start leader election without reset token");
+                    electionReponseNum = 0;
+                    for (let [key, value] of activeSocket) {
+                        startElection(value.acti, id, key);
+                    }
                 }
             }
+            // if(offServer == whoHold) {
+            //     console.log("Master with token failed, start leader election and reset token");
+            //     electionReponseNum = 0;
+            //     for (let[key, value] of activeSocket){
+            //         startElection(value.acti, id, key);
+            //     }
+            // }else {
+            //     ifSendToken = false;
+            //     console.log("Only Master failed, start leader election without reset token");
+            //     electionReponseNum = 0;
+            //     for (let [key, value] of activeSocket) {
+            //         startElection(value.acti, id, key);
+            //     }
+            // }
         }else{
             if(offServer == whoHold){
                 console.log("only token failed, reset token to Master")

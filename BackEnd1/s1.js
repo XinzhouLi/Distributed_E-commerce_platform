@@ -99,6 +99,7 @@ ioS1.on('connect', async function(socket){
     })
     if(isMaster){
         console.log("Server "+id+" SQL file sent to slaves");
+        socket.emit('responseMaster',master);
         DB.sendLocalSQL(db, socket);
     }
 
@@ -327,20 +328,33 @@ async function registerListener(sendSocket) {
             }
         }
 
+        console.log("master is: s"+master)
 
         if(offServer == master) {
-            if(offServer == whoHold) {
-                console.log("Master with token failed, start leader election and reset token");
-                electionReponseNum = 0;
-                for (let[key, value] of activeSocket){
-                    startElection(value.acti, id, key);
-                }
-            }else {
-                ifSendToken = false;
-                console.log("Only Master failed, start leader election without reset token");
-                electionReponseNum = 0;
-                for (let [key, value] of activeSocket) {
-                    startElection(value.acti, id, key);
+
+            console.log("totalAlive="+totalAlive);
+        
+            if(totalAlive == 1) {
+                isMaster = true;
+                master = id;
+                whoHold = id;
+                globalAvailable = true;
+                console.log("Server " + id + " is the only alive server now, " + "Server " + id + " becomes leader");
+            }
+            else {
+                if(offServer == whoHold) {
+                    console.log("Master with token failed, start leader election and reset token");
+                    electionReponseNum = 0;
+                    for (let[key, value] of activeSocket){
+                        startElection(value.acti, id, key);
+                    }
+                }else {
+                    ifSendToken = false;
+                    console.log("Only Master failed, start leader election without reset token");
+                    electionReponseNum = 0;
+                    for (let [key, value] of activeSocket) {
+                        startElection(value.acti, id, key);
+                    }
                 }
             }
         }else{
