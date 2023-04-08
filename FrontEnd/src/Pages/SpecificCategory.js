@@ -26,24 +26,28 @@ function SpecificCategory() {
 	const [obj3ID, setObj3ID] = useState(null);
 	const [obj4ID, setObj4ID] = useState(null);
 
-	let time = 0;
+	const [loading, setLoading] = useState(true);
+
 	useEffect(() => {
-		console.log(time)
-		time++;
-		console.log(obj1Name)
-		socket.emit("requestAllCateInfo", { "tableName": cateName })
-		socket.on("responseAllCateInfo", function (data) {
-			let socketData = JSON.parse(data)
-			setObj1Name(socketData.content[0].itemName)
-			setObj2Name(socketData.content[1].itemName)
-			setObj3Name(socketData.content[2].itemName)
-			setObj4Name(socketData.content[3].itemName)
-			setObj1ID(socketData.content[0].itemId)
-			setObj2ID(socketData.content[1].itemId)
-			setObj3ID(socketData.content[2].itemId)
-			setObj4ID(socketData.content[3].itemId)
-		})
-	}, [obj1Name, obj2Name, obj3Name, obj4Name, obj1ID, obj2ID, obj3ID, obj4ID])
+		async function fetchData() {
+			socket.emit("requestAllCateInfo", { "tableName": cateName })
+			socket.on("responseAllCateInfo", function (data) {
+				const socketData = JSON.parse(data);
+				setSocketData(socketData);
+				setObj1Name(socketData.content[0].itemName);
+				setObj2Name(socketData.content[1].itemName);
+				setObj3Name(socketData.content[2].itemName);
+				setObj4Name(socketData.content[3].itemName);
+				setObj1ID(socketData.content[0].itemId);
+				setObj2ID(socketData.content[1].itemId);
+				setObj3ID(socketData.content[2].itemId);
+				setObj4ID(socketData.content[3].itemId);
+				setLoading(false);
+			})
+		}
+
+		fetchData();
+	}, [])
 
 	function handleBtnClick(e) {
 		if (e.target.id === 'obj1') {
@@ -64,6 +68,11 @@ function SpecificCategory() {
 
 	}
 
+
+	if (loading) {
+		return <div>Loading...</div>;
+	}
+
 	return (
 		<div className="App">
 			<header className="App-header">
@@ -76,7 +85,7 @@ function SpecificCategory() {
 						</Form.Group>
 					</Form>
 					<Button>Submit</Button>
-					
+
 
 					<Row>
 						<Col>
