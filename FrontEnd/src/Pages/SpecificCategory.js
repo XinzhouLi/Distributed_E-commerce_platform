@@ -45,7 +45,6 @@ function SpecificCategory() {
 				setLoading(false);
 			})
 		}
-
 		fetchData();
 	}, [])
 
