@@ -39,7 +39,6 @@ function Item() {
 
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     socket.emit("requestSingleItem", {
       tableName: cateName,
@@ -54,7 +53,7 @@ function Item() {
       console.log(socketData);
       setDescription(socketData.content.description);
       setQuantity(socketData.content.quantity);
-      setLoading(false)
+      setLoading(false);
       console.log(description);
     });
   }, []);
@@ -89,22 +88,13 @@ function Item() {
   };
 
   if (loading) {
-		return <div>Loading...</div>;
-	}
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="App">
       <header className="App-header">
         <Container>
-          <Form>
-            <Form.Group>
-              <Form.Label>Tracking Number</Form.Label>
-              <Form.Control placeholder="XXXXXXXXXX"></Form.Control>
-              <Form.Text> Enter 10 Digits Tracking Number</Form.Text>
-            </Form.Group>
-          </Form>
-          <Button>Submit</Button>
-
           <Card style={{ color: "black" }}>
             <Card.Img src={imageURL} />
             <Card.Body>
