@@ -429,6 +429,46 @@ async function processAddOrder(UUID, input, socket, checkInfo) {
         let result = JSON.stringify({status: 0, content: "Storage is less than the quantityToBuy"})
         socket.emit('responseUserOrderStatus', result)
 
+    }else if(totalAlive==1){
+
+        if (waitingList[0] == UUID){
+            // 我手上持有token 并且本地可用 并我是list中第一位
+            //执行写入操作
+            try {
+                await DB.editItemQuantity(input.tableName, input.idName, input.id, input.quantityToBuy)
+                await DB.insertOrder(input.insertOrderData)
+                dbVersion++
+                await DB.editVersion(dbVersion)
+            } catch (e) {
+                let result = JSON.stringify({status: 0, content: e.message})
+                socket.emit('responseUserOrderStatus', result)
+            }
+            let result = JSON.stringify({status: 1, content: "Order successfully placed"})
+            console.log("One server situation, writing work done")
+            socket.emit('responseUserOrderStatus', result)
+
+            // //向别人发送写入操作指令
+            // console.log("Server "+id+": Send back", result)
+            // for(let[key, value] of activeSocket){
+            //     value.acti.emit("writeOrder", input)
+            // }
+            waitingList.shift()
+            if(waitingList.length==0){
+                globalAvailable=true;
+                localAvailable=true;
+            }else{
+                localAvailable=true;
+                emitter.emit("wakeup");
+            }
+
+
+        }else{
+            //等待并重新执行
+            emitter.once("wakeup", async () => {
+                await processAddOrder(UUID, input, socket, checkInfo)
+            })
+        }
+
     }
     else{
         //try to get token
