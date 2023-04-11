@@ -37,6 +37,8 @@ function Item() {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     socket.emit("requestSingleItem", {
       tableName: cateName,
@@ -46,14 +48,15 @@ function Item() {
     console.log("sent:");
     console.log(cateName + "itemId" + itemId);
     socket.on("responseSingleItemInfo", function (data) {
-      let socketData = JSON.parse(data);
+      const socketData = JSON.parse(data);
       console.log("socketData is below");
       console.log(socketData);
       setDescription(socketData.content.description);
       setQuantity(socketData.content.quantity);
+      setLoading(false);
       console.log(description);
     });
-  }, [cateName, itemName, itemId, description]);
+  }, []);
 
   const handleMinusBtn = () => {
     if (quantityToBuy > 1) {
@@ -84,19 +87,14 @@ function Item() {
     }
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="App">
       <header className="App-header">
         <Container>
-          <Form>
-            <Form.Group>
-              <Form.Label>Tracking Number</Form.Label>
-              <Form.Control placeholder="XXXXXXXXXX"></Form.Control>
-              <Form.Text> Enter 10 Digits Tracking Number</Form.Text>
-            </Form.Group>
-          </Form>
-          <Button>Submit</Button>
-
           <Card style={{ color: "black" }}>
             <Card.Img src={imageURL} />
             <Card.Body>
